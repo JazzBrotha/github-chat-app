@@ -1,0 +1,24 @@
+.message-menu {
+  background-color: white;
+  height: 100vh;
+  padding: 20px;
+}
+
+.test {
+  height: 95vh;
+  overflow: auto;
+}
+
+.column.p-0 {
+  padding: 0
+}
+
+.p-10 {
+  padding: 10px;
+}
+
+li {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
