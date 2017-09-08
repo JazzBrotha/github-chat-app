@@ -1,11 +1,11 @@
 import firebase from 'firebase'
 const config = {
-  apiKey: 'AIzaSyCrgeXqurYdIT49kFcBdUG5mHwtfvmje88',
-  authDomain: 'react-chat-app-ee391.firebaseapp.com',
-  databaseURL: 'https://react-chat-app-ee391.firebaseio.com',
-  projectId: 'react-chat-app-ee391',
-  storageBucket: 'react-chat-app-ee391.appspot.com',
-  messagingSenderId: '594522987014'
+  apiKey: 'AIzaSyBVjw4O9iQBIs2Q8tseXxf7MSayxLCUO4A',
+  authDomain: 'simple-gh-chat.firebaseapp.com',
+  databaseURL: 'https://simple-gh-chat.firebaseio.com',
+  projectId: 'simple-gh-chat',
+  storageBucket: 'simple-gh-chat.appspot.com',
+  messagingSenderId: '59806792121'
 }
 firebase.initializeApp(config)
 

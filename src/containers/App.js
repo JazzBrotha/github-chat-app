@@ -15,31 +15,39 @@ import DisplayItem from '../components/displayItem'
 class App extends Component {
 
   state = {
-    currentItem: '',
+    currentMessage: '',
         username: '',
-        items: [],
-        user: null,
         messages: [],
-        date: Date
+        user: null,
+        date: Date,
+        users: [],
+        rooms: [],
+        currentRoom: ''
   }
 
 // Custom Methods
   handleSubmit = e => {
     e.preventDefault()
-    const itemsRef = firebase.database().ref('items')
-    const item = {
-      title: this.state.currentItem,
+    const messagesRef = firebase.database().ref('messages')
+    const date = new Date()
+    const day = date.getUTCDate() 
+    let year = date.getUTCFullYear()
+    let month = date.getUTCMonth()
+    month = ("0" + (month + 1)).slice(-2)
+    year = year.toString().substr(2,2) 
+    const formattedDate = day + '/' + month + "/" + year
+    
+    const message = {
+      body: this.state.currentMessage,
       user: this.state.user.displayName || this.state.user.email,
-      date: Date.now()
+      date: formattedDate
     }
-    if (this.state.items.length) {
-      itemsRef.push(item)
+      messagesRef.push(message)
       this.setState({
-        currentItem: '',
+        currentMessage: '',
         username: '',
-        date: Date.now()
+        date: formattedDate
       })
-    }
   }
 
 
@@ -67,9 +75,34 @@ class App extends Component {
     })
   }
 
-  removeItem = (itemId) => {
-    const itemRef = firebase.database().ref(`/items/${itemId}`)
-    itemRef.remove()
+  removeMessage = (messageId) => {
+    const messageRef = firebase.database().ref(`/messages/${messageId}`)
+    messageRef.remove()
+  }
+
+  createRoom = (name) => {
+    const messagesRef = firebase.database().ref('rooms')
+    const room = {
+      name: name,
+      users: []
+    }
+    room.users.push(this.state.user.email)
+    messagesRef.push(room)
+  }
+
+  displayRoomInput = () => {
+    const input = document.createElement('input')
+    input.setAttribute('type', 'text')
+    input.setAttribute('placeholder', 'Type room name and press enter')
+    const test = document.getElementById('test')
+    test.appendChild(input)
+    input.addEventListener('keyup', (e) => {
+      if (input.value.length > 0) {
+        if (e.which === 13) {
+        this.createRoom(input.value)
+      }
+      }
+    })
   }
 
 // Mountings
@@ -79,22 +112,49 @@ class App extends Component {
         this.setState({ user })
       }
     })
-    const itemsRef = firebase.database().ref('items')
-    itemsRef.on('value', (snapshot) => {
-      let items = snapshot.val()
+    const messagesRef = firebase.database().ref('messages')
+    messagesRef.on('value', (snapshot) => {
+      let messages = snapshot.val()
       let newState = []
-      for (let item in items) {
+      for (let message in messages) {
         newState.push({
-          id: item,
-          title: items[item].title,
-          user: items[item].user,
-          date: items[item].date
+          id: message,
+          body: messages[message].body,
+          user: messages[message].user,
+          date: messages[message].date
         })
       }
       this.setState({
-        items: newState
+        messages: newState
       })
     })
+    const usersRef = firebase.database().ref('users')
+    usersRef.on('value', (snapshot) => {
+      const users = snapshot.val()
+    let userArr = []
+    for (const user in users) {
+      userArr.push(users[user])
+    }
+    const activeUser = this.state.user.email
+    if (!userArr.includes(activeUser)) {
+      usersRef.push(activeUser)      
+      userArr.push(activeUser)
+    }
+    this.setState({
+      users: userArr
+    })
+  })
+  // const roomsRef = firebase.database().ref('rooms')
+  // roomsRef.on('value', (snapshot) => {
+  //   const rooms = snapshot.val()
+  //   let roomsArr = []
+  //   for (const room in rooms) {
+  //     roomsArr.push(rooms[room])
+  //   }
+  //   this.setState({
+  //     rooms: roomsArr
+  //   })
+  // })
   }
 
 // Render
@@ -106,17 +166,18 @@ class App extends Component {
             <div className='column is-2 p-0'>
               <Menu
                 onClick={this.logout}
-                src={this.state.user.photoURL}
+                displayRoomInput={this.displayRoomInput}
               />
             </div>
             <div className='column is-10 p-0'>
               <Lobby
                 onSubmit={this.handleSubmit}
-                items={this.state.items}
+                messages={this.state.messages}
                 onChange = {this.handleChange}
                 username = {this.state.username}
-                currentItem = {this.state.currentItem}
-                removeItem = {this.removeItem}
+                currentMessage = {this.state.currentMessage}
+                removeMessage = {this.removeMessage}
+                src={this.state.user.photoURL}
               />
             </div>
           </div>
