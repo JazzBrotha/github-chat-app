@@ -1,17 +1,23 @@
 import React from 'react'
-function Menu ({onClick, src, displayRoomInput}) {
+function Menu ({onClick, src, displayRoomInput, rooms}) {
   return (
     <aside className='menu message-menu'>
       <p className='menu-label'>
-    Rooms 
+    Rooms
       </p>
-      <div id="test">
+      <div id='create-room-container'>
         <li>Create Room <a onClick={displayRoomInput}><i className='fa fa-plus-square-o' aria-hidden='true' /></a></li>
       </div>
       <ul className='menu-list'>
         <li>
-          <ul>
+          <ul id='room-list'>
             <li><a>Lobby</a></li>
+            {/* { rooms.map(room => {
+              return (
+                <li><a>{room.name}</a></li>
+              )
+            })
+          } */}
           </ul>
         </li>
       </ul>

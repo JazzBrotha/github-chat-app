@@ -1,5 +1,5 @@
 import React from 'react'
-function Header ({ onClick, name }) {
+function Header ({ login, name }) {
   return (
     <div className='modal is-active'>
       <div className='modal-background' />
@@ -17,7 +17,7 @@ function Header ({ onClick, name }) {
         <footer className='modal-card-foot'>
           <button
             className='button is-success'
-            onClick={onClick}>{name}
+            onClick={login}>{name}
           </button>
           <button className='button'>Cancel</button>
         </footer>

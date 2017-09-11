@@ -39,7 +39,8 @@ class App extends Component {
     
     const message = {
       body: this.state.currentMessage,
-      user: this.state.user.displayName || this.state.user.email,
+      username: this.state.user.displayName || this.state.user.email,
+      profile_pic: this.state.user.photoURL,
       date: formattedDate
     }
       messagesRef.push(message)
@@ -88,21 +89,36 @@ class App extends Component {
     }
     room.users.push(this.state.user.email)
     messagesRef.push(room)
+
+    const stateRooms = this.setState.rooms
+    stateRooms.push(room)
+    this.setState({
+      rooms: stateRooms
+    })
   }
 
   displayRoomInput = () => {
     const input = document.createElement('input')
     input.setAttribute('type', 'text')
     input.setAttribute('placeholder', 'Type room name and press enter')
-    const test = document.getElementById('test')
-    test.appendChild(input)
+    const createRoomContainer = document.getElementById('create-room-container')
+    createRoomContainer.appendChild(input)
     input.addEventListener('keyup', (e) => {
       if (input.value.length > 0) {
         if (e.which === 13) {
         this.createRoom(input.value)
+        createRoomContainer.removeChild(input)
+        this.displayRoomName(input.value)
       }
       }
     })
+  }
+
+  displayRoomName = (name) => {
+    const roomList = document.getElementById('room-list')
+    const list = document.createElement('li')
+    list.innerHTML = `<a>${name}</a>`
+    roomList.appendChild(list)
   }
 
 // Mountings
@@ -120,7 +136,8 @@ class App extends Component {
         newState.push({
           id: message,
           body: messages[message].body,
-          user: messages[message].user,
+          username: messages[message].username,
+          profile_pic: messages[message].profile_pic,
           date: messages[message].date
         })
       }
@@ -131,30 +148,30 @@ class App extends Component {
     const usersRef = firebase.database().ref('users')
     usersRef.on('value', (snapshot) => {
       const users = snapshot.val()
-    let userArr = []
-    for (const user in users) {
-      userArr.push(users[user])
-    }
-    const activeUser = this.state.user.email
-    if (!userArr.includes(activeUser)) {
-      usersRef.push(activeUser)      
-      userArr.push(activeUser)
+      let userArr = []
+      for (const user in users) {
+        userArr.push(users[user])
+      }
+      const activeUser = this.state.user.email
+      if (!userArr.includes(activeUser)) {
+        usersRef.push(activeUser)      
+        userArr.push(activeUser)
+      }
+      this.setState({
+        users: userArr
+      })
+  })
+  const roomsRef = firebase.database().ref('rooms')
+  roomsRef.on('value', (snapshot) => {
+    const rooms = snapshot.val()
+    let roomsArr = []
+    for (const room in rooms) {
+      roomsArr.push(rooms[room])
     }
     this.setState({
-      users: userArr
+      rooms: roomsArr
     })
   })
-  // const roomsRef = firebase.database().ref('rooms')
-  // roomsRef.on('value', (snapshot) => {
-  //   const rooms = snapshot.val()
-  //   let roomsArr = []
-  //   for (const room in rooms) {
-  //     roomsArr.push(rooms[room])
-  //   }
-  //   this.setState({
-  //     rooms: roomsArr
-  //   })
-  // })
   }
 
 // Render
@@ -177,14 +194,14 @@ class App extends Component {
                 username = {this.state.username}
                 currentMessage = {this.state.currentMessage}
                 removeMessage = {this.removeMessage}
-                src={this.state.user.photoURL}
               />
             </div>
           </div>
           : <div className='container'>
             <Header
               name='Login'
-              onClick={this.login}
+              login={this.login}
+              rooms={this.state.rooms}
             />
           </div>
         }

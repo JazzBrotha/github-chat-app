@@ -1,5 +1,5 @@
 import React from 'react'
-function Lobby ({ onSubmit, onChange, username, currentMessage, messages, removeMessage, src }) {
+function Lobby ({ onSubmit, onChange, username, currentMessage, messages, removeMessage}) {
   return (
     <div>
       <div className='card test p-10'>
@@ -8,18 +8,18 @@ function Lobby ({ onSubmit, onChange, username, currentMessage, messages, remove
         </header>
         <div className='card-content'>
           <div className='content'>
-            { messages.map((message) => {
+            { messages.map(message => {
               return (
                 <article key={message.id} className='media'>
                   <figure className='media-left' style={{ margin: 0 }}>
                     <p className='image is-64x64'>
-                      <img src={src} />
+                      <img src={message.profile_pic} />
                     </p>
                   </figure>
                   <div className='media-content'>
                     <div className='content'>
                       <p>
-                        <strong>{message.user}</strong> <small>{message.date}</small>
+                        <strong>{message.username}</strong> <small>{message.date}</small>
                         <br />
                         {message.body}
                       </p>
