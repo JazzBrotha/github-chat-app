@@ -52,7 +52,7 @@ class App extends Component {
   }
 
 
-  handleChange = (e) => {
+  handleChange = e => {
     this.setState({
       [e.target.name]: e.target.value
     })
@@ -76,25 +76,19 @@ class App extends Component {
     })
   }
 
-  removeMessage = (messageId) => {
+  removeMessage = messageId => {
     const messageRef = firebase.database().ref(`/messages/${messageId}`)
     messageRef.remove()
   }
 
-  createRoom = (name) => {
-    const messagesRef = firebase.database().ref('rooms')
+  createRoom = name => {
+    const roomsRef = firebase.database().ref('rooms')
     const room = {
       name: name,
       users: []
     }
     room.users.push(this.state.user.email)
-    messagesRef.push(room)
-
-    const stateRooms = this.setState.rooms
-    stateRooms.push(room)
-    this.setState({
-      rooms: stateRooms
-    })
+    roomsRef.push(room)
   }
 
   displayRoomInput = () => {
@@ -108,18 +102,11 @@ class App extends Component {
         if (e.which === 13) {
         this.createRoom(input.value)
         createRoomContainer.removeChild(input)
-        this.displayRoomName(input.value)
       }
       }
     })
   }
 
-  displayRoomName = (name) => {
-    const roomList = document.getElementById('room-list')
-    const list = document.createElement('li')
-    list.innerHTML = `<a>${name}</a>`
-    roomList.appendChild(list)
-  }
 
 // Mountings
   componentDidMount = () => {
@@ -166,7 +153,11 @@ class App extends Component {
     const rooms = snapshot.val()
     let roomsArr = []
     for (const room in rooms) {
-      roomsArr.push(rooms[room])
+      roomsArr.push({
+        id: room,
+        name: rooms[room].name,
+        users: rooms[room].users
+      })
     }
     this.setState({
       rooms: roomsArr
@@ -184,6 +175,8 @@ class App extends Component {
               <Menu
                 onClick={this.logout}
                 displayRoomInput={this.displayRoomInput}
+                rooms={this.state.rooms}
+                username = {this.state.user.displayName || this.state.user.email}
               />
             </div>
             <div className='column is-10 p-0'>
@@ -201,7 +194,6 @@ class App extends Component {
             <Header
               name='Login'
               login={this.login}
-              rooms={this.state.rooms}
             />
           </div>
         }
