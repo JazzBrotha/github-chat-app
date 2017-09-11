@@ -16,13 +16,13 @@ class App extends Component {
 
   state = {
     currentMessage: '',
-        username: '',
-        messages: [],
-        user: null,
-        date: Date,
-        users: [],
-        rooms: [],
-        currentRoom: ''
+    username: '',
+    messages: [],
+    user: null,
+    date: Date,
+    users: [],
+    rooms: [],
+    currentRoom: ''
   }
 
 // Custom Methods
@@ -191,7 +191,7 @@ class App extends Component {
                 onSubmit={this.handleSubmit}
                 messages={this.state.messages}
                 onChange = {this.handleChange}
-                username = {this.state.username}
+                username = {this.state.user.displayName || this.state.user.email}
                 currentMessage = {this.state.currentMessage}
                 removeMessage = {this.removeMessage}
               />

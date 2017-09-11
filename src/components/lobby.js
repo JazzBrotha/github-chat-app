@@ -1,5 +1,5 @@
 import React from 'react'
-function Lobby ({ onSubmit, onChange, username, currentMessage, messages, removeMessage}) {
+function Lobby ({ onSubmit, onChange, username, currentMessage, messages, removeMessage }) {
   return (
     <div>
       <div className='card test p-10'>
@@ -25,9 +25,13 @@ function Lobby ({ onSubmit, onChange, username, currentMessage, messages, remove
                       </p>
                     </div>
                   </div>
-                  <div className='media-right'>
-                    <button onClick={() => removeMessage(message.id)} className='delete' />
-                  </div>
+                  { message.username === username
+                    ? <div className='media-right'>
+                      <button onClick={() => removeMessage(message.id)} className='delete' />
+                    </div>
+                    : <div />
+                  }
+
                 </article>
               )
             })}
