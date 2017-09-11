@@ -1,5 +1,5 @@
 import React from 'react'
-function Menu ({onClick, src, displayRoomInput, rooms, username}) {
+function Menu ({onClick, src, displayRoomInput, rooms, username, toggleRooms}) {
   return (
     <aside className='menu message-menu'>
       <p className='menu-label'>
@@ -11,11 +11,11 @@ function Menu ({onClick, src, displayRoomInput, rooms, username}) {
       <ul className='menu-list'>
         <li>
           <ul id='room-list'>
-            <li><a>Lobby</a></li>
+            <li onClick={() => toggleRooms('Lobby')}><a>Lobby</a></li>
             { rooms.map(room => {
               if (room.users.includes(username)) {
                 return (
-                  <li key={room.id}>
+                  <li key={room.id} onClick={() => toggleRooms(room.name)}>
                     <a>{room.name}</a>
                   </li>
                 )

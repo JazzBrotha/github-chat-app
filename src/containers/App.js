@@ -41,7 +41,8 @@ class App extends Component {
       body: this.state.currentMessage,
       username: this.state.user.displayName || this.state.user.email,
       profile_pic: this.state.user.photoURL,
-      date: formattedDate
+      date: formattedDate,
+      room: this.state.currentRoom
     }
       messagesRef.push(message)
       this.setState({
@@ -50,7 +51,6 @@ class App extends Component {
         date: formattedDate
       })
   }
-
 
   handleChange = e => {
     this.setState({
@@ -106,7 +106,11 @@ class App extends Component {
       }
     })
   }
-
+  toggleRooms = (room) => {
+    this.setState({
+      currentRoom: room
+    })
+  }
 
 // Mountings
   componentDidMount = () => {
@@ -125,7 +129,8 @@ class App extends Component {
           body: messages[message].body,
           username: messages[message].username,
           profile_pic: messages[message].profile_pic,
-          date: messages[message].date
+          date: messages[message].date,
+          room: messages[message].room
         })
       }
       this.setState({
@@ -160,7 +165,8 @@ class App extends Component {
       })
     }
     this.setState({
-      rooms: roomsArr
+      rooms: roomsArr,
+      currentRoom: 'Lobby'
     })
   })
   }
@@ -177,6 +183,7 @@ class App extends Component {
                 displayRoomInput={this.displayRoomInput}
                 rooms={this.state.rooms}
                 username = {this.state.user.displayName || this.state.user.email}
+                toggleRooms = {this.toggleRooms}
               />
             </div>
             <div className='column is-10 p-0'>
@@ -187,6 +194,7 @@ class App extends Component {
                 username = {this.state.user.displayName || this.state.user.email}
                 currentMessage = {this.state.currentMessage}
                 removeMessage = {this.removeMessage}
+                currentRoom = {this.state.currentRoom}
               />
             </div>
           </div>
