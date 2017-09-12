@@ -1,4 +1,5 @@
 import React from 'react'
+import { closeModal } from '../utils/handlers.js'
 function Lobby ({
   onSubmit,
   onChange,
@@ -8,7 +9,8 @@ function Lobby ({
   messages,
   removeMessage,
   inviteUser,
-  submitInviteUser
+  submitInviteUser,
+  roomCreator
 }) {
   return (
     <div>
@@ -16,16 +18,14 @@ function Lobby ({
         <div className='modal-background' />
         <div className='modal-card'>
           <header className='modal-card-head'>
-            <p className='modal-card-title'>Invite users to {currentRoom}</p>
-            <button className='delete' aria-label='close' />
+            <p className='modal-card-title'>Invite users to "{currentRoom}"</p>
+            <button onClick={() => closeModal('invite-user-modal')} className='delete' aria-label='close' />
           </header>
           <section id='invite-user-modal-body' className='modal-card-body'>
             <div className='field'>
               <p className='control has-icons-left'>
                 <span className='select'>
-                  <select id='users-select'>
-                    <option>User</option>
-                  </select>
+                  <select id='users-select' />
                 </span>
                 <span className='icon is-small is-left'>
                   <i className='fa fa-user' />
@@ -36,14 +36,45 @@ function Lobby ({
           </section>
           <footer className='modal-card-foot'>
             <button onClick={submitInviteUser} id='submit-invite-user' className='button is-success'>Invite</button>
-            <button className='button'>Cancel</button>
+            <button onClick={() => closeModal('invite-user-modal')} className='button'>Cancel</button>
           </footer>
         </div>
       </div>
       <div className='card test p-10'>
-        <header className='card-header'>
-          <p className='card-header-title'>{currentRoom} <a onClick={inviteUser}><i className='fa fa-user-plus' aria-hidden='true' /></a></p>
+        <header className='card-header bs-none'>
+          <nav className='navbar' role='navigation' aria-label='navigation'>
+            <div className='navbar-item'>
+              <h3 className='title is-3'>{currentRoom}</h3>
+            </div>
+          </nav>
         </header>
+        { currentRoom !== 'Lobby'
+        ? <header className='card-header'>
+          <nav className='navbar' role='navigation' aria-label='navigation'>
+            <a onClick={inviteUser} className='navbar-item'>
+              <span className='bd-emoji mr-5'>
+                <i className='fa fa-user-plus' aria-hidden='true' />
+              </span>
+              Invite User
+            </a>
+            { roomCreator === username
+              ? <a className='navbar-item'>
+                <span className='bd-emoji mr-5'>
+                  <i className='fa fa-trash' aria-hidden='true' />
+                </span>
+                   Delete Room
+                 </a>
+              : <a className='navbar-item'>
+                <span className='bd-emoji mr-5'>
+                  <i className='fa fa-sign-out' aria-hidden='true' />
+                </span>
+              Leave Room
+            </a>
+            }
+          </nav>
+        </header>
+        : <header />
+        }
         <div className='card-content'>
           <div className='content'>
             { messages.map(message => {

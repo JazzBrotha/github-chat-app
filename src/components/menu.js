@@ -5,9 +5,6 @@ function Menu ({onClick, src, displayRoomInput, rooms, username, toggleRooms}) {
       <p className='menu-label'>
     Rooms
       </p>
-      <div id='create-room-container'>
-        <li>Create Room <a onClick={displayRoomInput}><i className='fa fa-plus' aria-hidden='true' /></a></li>
-      </div>
       <ul className='menu-list'>
         <li>
           <ul id='room-list'>
@@ -15,8 +12,8 @@ function Menu ({onClick, src, displayRoomInput, rooms, username, toggleRooms}) {
             { rooms.map(room => {
               if (room.users.includes(username)) {
                 return (
-                  <li key={room.id} onClick={() => toggleRooms(room.name)}>
-                    <a>{room.name}</a>
+                  <li key={room.id} onClick={() => toggleRooms(room)}>
+                    <a className='room-link-item'>{room.name}</a>
                   </li>
                 )
               }
@@ -25,6 +22,9 @@ function Menu ({onClick, src, displayRoomInput, rooms, username, toggleRooms}) {
           </ul>
         </li>
       </ul>
+      <div id='create-room-container'>
+        <li>Create Room <a onClick={displayRoomInput}><i className='fa fa-plus' aria-hidden='true' /></a></li>
+      </div>
       <p className='menu-label'>
     Profile
   </p>

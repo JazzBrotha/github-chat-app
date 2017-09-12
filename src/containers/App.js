@@ -10,6 +10,7 @@ import UserProfile from '../components/userProfile'
 import AddItem from '../components/addItem'
 import Menu from '../components/menu'
 import DisplayItem from '../components/displayItem'
+import {toggleActiveRoomLinkColors} from '../utils/displays'
 
 // Main class
 class App extends Component {
@@ -40,7 +41,7 @@ class App extends Component {
     
     const message = {
       body: this.state.currentMessage,
-      username: this.state.user.displayName || this.state.user.email,
+      username: this.state.user.email,
       profile_pic: this.state.user.photoURL,
       date: formattedDate,
       room: this.state.currentRoom
@@ -86,7 +87,8 @@ class App extends Component {
     const roomsRef = firebase.database().ref('rooms')
     const room = {
       name: name,
-      users: []
+      users: [],
+      creator: this.state.user.email
     }
     room.users.push(this.state.user.email)
     roomsRef.push(room)
@@ -103,14 +105,22 @@ class App extends Component {
         if (e.which === 13) {
         this.createRoom(input.value)
         createRoomContainer.removeChild(input)
+        this.toggleRooms(input.value)
       }
       }
     })
   }
   toggleRooms = room => {
-    this.setState({
-      currentRoom: room
+    room === 'Lobby'
+    ? this.setState({
+      currentRoom: room,
+      roomCreator: ''
     })
+    : this.setState({
+      currentRoom: room.name,
+      roomCreator: room.creator
+    })
+    toggleActiveRoomLinkColors(room.name || 'Lobby')
   }
 
   inviteUser = async () => {
@@ -146,7 +156,7 @@ class App extends Component {
     const usersSnapshot = await usersRef.once('value')
     const usersObj = usersSnapshot.val()
 
-    let nonRoomUsers = []
+    document.getElementById('users-select').innerHTML = '<option>User</option>'
 
     // Find users that are not in the selected room
       for (const user in usersObj) {
@@ -179,6 +189,10 @@ class App extends Component {
           .set(roomUsers)
 
         document.getElementById('invite-user-modal').classList.remove('is-active')
+
+        this.setState({
+          roomKey: '', 
+        })
 
       } else {
       errorContainer.innerHTML = `<p>Please select a user</p>`       
@@ -234,7 +248,8 @@ class App extends Component {
       roomsArr.push({
         id: room,
         name: rooms[room].name,
-        users: rooms[room].users
+        users: rooms[room].users,
+        creator: rooms[room].creator
       })
     }
     this.setState({
@@ -255,7 +270,7 @@ class App extends Component {
                 onClick={this.logout}
                 displayRoomInput={this.displayRoomInput}
                 rooms={this.state.rooms}
-                username = {this.state.user.displayName || this.state.user.email}
+                username = {this.state.user.email}
                 toggleRooms = {this.toggleRooms}
               />
             </div>
@@ -264,10 +279,11 @@ class App extends Component {
                 onSubmit={this.handleSubmit}
                 messages={this.state.messages}
                 onChange = {this.handleChange}
-                username = {this.state.user.displayName || this.state.user.email}
+                username = {this.state.user.email}
                 currentMessage = {this.state.currentMessage}
                 removeMessage = {this.removeMessage}
                 currentRoom = {this.state.currentRoom}
+                roomCreator = {this.state.roomCreator}
                 inviteUser = {this.inviteUser}
                 submitInviteUser = {this.submitInviteUser}
               />
