@@ -22,7 +22,8 @@ class App extends Component {
     date: Date,
     users: [],
     rooms: [],
-    currentRoom: ''
+    currentRoom: '',
+    roomKey: ''
   }
 
 // Custom Methods
@@ -106,11 +107,83 @@ class App extends Component {
       }
     })
   }
-  toggleRooms = (room) => {
+  toggleRooms = room => {
     this.setState({
       currentRoom: room
     })
   }
+
+  inviteUser = async () => {
+    document.getElementById('invite-user-modal').classList.add('is-active')
+    const roomsRef = firebase.database().ref('rooms')
+    const usersRef = firebase.database().ref('users')
+    let roomUsers
+    let roomKey
+
+    // Find room snapshot
+    const roomSnapshot = await roomsRef
+      .orderByChild('name')
+      .equalTo(this.state.currentRoom)
+      .once('value')
+
+    // Get room object
+    const roomObj = roomSnapshot.val()
+
+    // Assign room key
+    for (const prop in roomObj) {
+      roomKey = prop
+      }
+
+    this.setState({
+      roomKey: roomKey
+    })
+
+    // Assign room users
+    roomSnapshot.forEach(data => {
+      roomUsers = data.val().users
+    })
+
+    const usersSnapshot = await usersRef.once('value')
+    const usersObj = usersSnapshot.val()
+
+    let nonRoomUsers = []
+
+    // Find users that are not in the selected room
+      for (const user in usersObj) {
+        if (!roomUsers.includes(usersObj[user])) {
+          document.getElementById('users-select').innerHTML += `<option>${usersObj[user]}</option>`
+        }
+      }
+    }
+
+    submitInviteUser = async () => {
+      const userSelectValue = document.getElementById('users-select').value
+      const errorContainer = document.getElementById('error-container')
+      if (userSelectValue !== 'User') {
+        errorContainer.innerHTML = ``
+        
+        // Get room users' snapshot
+        const roomSnapshot = await firebase.database()
+          .ref(`rooms/${this.state.roomKey}/users`)
+          .once('value')
+        
+        // Get room users' value
+        let roomUsers = roomSnapshot.val()
+
+        // Add new room user
+        roomUsers.push(userSelectValue)
+
+        // Update db ref
+        firebase.database()
+          .ref(`rooms/${this.state.roomKey}/users`)
+          .set(roomUsers)
+
+        document.getElementById('invite-user-modal').classList.remove('is-active')
+
+      } else {
+      errorContainer.innerHTML = `<p>Please select a user</p>`       
+      }
+    }
 
 // Mountings
   componentDidMount = () => {
@@ -195,6 +268,8 @@ class App extends Component {
                 currentMessage = {this.state.currentMessage}
                 removeMessage = {this.removeMessage}
                 currentRoom = {this.state.currentRoom}
+                inviteUser = {this.inviteUser}
+                submitInviteUser = {this.submitInviteUser}
               />
             </div>
           </div>

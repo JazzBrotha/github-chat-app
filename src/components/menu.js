@@ -6,7 +6,7 @@ function Menu ({onClick, src, displayRoomInput, rooms, username, toggleRooms}) {
     Rooms
       </p>
       <div id='create-room-container'>
-        <li>Create Room <a onClick={displayRoomInput}><i className='fa fa-plus-square-o' aria-hidden='true' /></a></li>
+        <li>Create Room <a onClick={displayRoomInput}><i className='fa fa-plus' aria-hidden='true' /></a></li>
       </div>
       <ul className='menu-list'>
         <li>

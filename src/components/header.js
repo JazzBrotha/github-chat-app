@@ -6,10 +6,7 @@ function Header ({ login, name }) {
       <div className='modal-card'>
         <header className='modal-card-head'>
           <p className='modal-card-title'>Log In</p>
-          <button
-            className='delete'
-            aria-label='close'
-          />
+          <button className='delete' aria-label='close' />
         </header>
         <section className='modal-card-body'>
           <p>Log in with your GitHub account to get started.</p>
