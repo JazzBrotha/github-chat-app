@@ -10,7 +10,9 @@ function Lobby ({
   removeMessage,
   inviteUser,
   submitInviteUser,
-  roomCreator
+  roomCreator,
+  roomId,
+  removeRoom
 }) {
   return (
     <div>
@@ -58,7 +60,7 @@ function Lobby ({
               Invite User
             </a>
             { roomCreator === username
-              ? <a className='navbar-item'>
+              ? <a onClick={() => removeRoom(roomId)} className='navbar-item'>
                 <span className='bd-emoji mr-5'>
                   <i className='fa fa-trash' aria-hidden='true' />
                 </span>

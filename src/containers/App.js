@@ -24,7 +24,7 @@ class App extends Component {
     users: [],
     rooms: [],
     currentRoom: '',
-    roomKey: ''
+    roomId: ''
   }
 
 // Custom Methods
@@ -83,6 +83,23 @@ class App extends Component {
     messageRef.remove()
   }
 
+  removeRoom = async (roomId) => {
+    const messagesSnapshot = await firebase.database()
+    .ref(`messages`)
+    .once('value')
+  
+  // Find messages that matches active room and remove
+  const messages = messagesSnapshot.val()
+  for (const message in messages) {
+    const messageRoom = messages[message].room
+    if (messageRoom === this.state.currentRoom) {
+      firebase.database().ref(`/messages/${message}`).remove()
+    }
+   }
+    const roomRef = firebase.database().ref(`/rooms/${roomId}`)
+    roomRef.remove()
+  }
+
   createRoom = name => {
     const roomsRef = firebase.database().ref('rooms')
     const room = {
@@ -114,11 +131,13 @@ class App extends Component {
     room === 'Lobby'
     ? this.setState({
       currentRoom: room,
-      roomCreator: ''
+      roomCreator: '',
+      roomId: ''
     })
     : this.setState({
       currentRoom: room.name,
-      roomCreator: room.creator
+      roomCreator: room.creator,
+      roomId: room.id
     })
     toggleActiveRoomLinkColors(room.name || 'Lobby')
   }
@@ -128,7 +147,7 @@ class App extends Component {
     const roomsRef = firebase.database().ref('rooms')
     const usersRef = firebase.database().ref('users')
     let roomUsers
-    let roomKey
+    let roomId
 
     // Find room snapshot
     const roomSnapshot = await roomsRef
@@ -141,11 +160,11 @@ class App extends Component {
 
     // Assign room key
     for (const prop in roomObj) {
-      roomKey = prop
+      roomId = prop
       }
 
     this.setState({
-      roomKey: roomKey
+      roomId: roomId
     })
 
     // Assign room users
@@ -174,7 +193,7 @@ class App extends Component {
         
         // Get room users' snapshot
         const roomSnapshot = await firebase.database()
-          .ref(`rooms/${this.state.roomKey}/users`)
+          .ref(`rooms/${this.state.roomId}/users`)
           .once('value')
         
         // Get room users' value
@@ -185,13 +204,13 @@ class App extends Component {
 
         // Update db ref
         firebase.database()
-          .ref(`rooms/${this.state.roomKey}/users`)
+          .ref(`rooms/${this.state.roomId}/users`)
           .set(roomUsers)
 
         document.getElementById('invite-user-modal').classList.remove('is-active')
 
         this.setState({
-          roomKey: '', 
+          roomId: '', 
         })
 
       } else {
@@ -282,8 +301,10 @@ class App extends Component {
                 username = {this.state.user.email}
                 currentMessage = {this.state.currentMessage}
                 removeMessage = {this.removeMessage}
+                removeRoom = {this.removeRoom}                
                 currentRoom = {this.state.currentRoom}
                 roomCreator = {this.state.roomCreator}
+                roomId = {this.state.roomId}                
                 inviteUser = {this.inviteUser}
                 submitInviteUser = {this.submitInviteUser}
               />

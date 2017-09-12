@@ -1,5 +1,12 @@
 import React from 'react'
-function Menu ({onClick, src, displayRoomInput, rooms, username, toggleRooms}) {
+function Menu ({
+  onClick,
+  src,
+  displayRoomInput,
+  rooms,
+  username,
+  toggleRooms
+}) {
   return (
     <aside className='menu message-menu'>
       <p className='menu-label'>
