@@ -18,11 +18,9 @@ const toggleActiveRoomLinkColors = (room) => {
   const roomLinkItems = Array.from(document.getElementsByClassName('room-link-item'))
   roomLinkItems.forEach(item => {
     if (item.innerText === room) {
-      item.style.backgroundColor = 'whitesmoke'
-      item.style.color = '#363636'
+      item.classList.add('is-active')
     } else {
-      item.style.backgroundColor = 'transparent'
-      item.style.color = '#4a4a4a'
+      item.classList.remove('is-active')
     }
   })
 }

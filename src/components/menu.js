@@ -15,7 +15,7 @@ function Menu ({
       <ul className='menu-list'>
         <li>
           <ul id='room-list'>
-            <li onClick={() => toggleRooms('Lobby')}><a>Lobby</a></li>
+            <li onClick={() => toggleRooms('Lobby')}><a className='room-link-item'>Lobby</a></li>
             { rooms.map(room => {
               if (room.users.includes(username)) {
                 return (
@@ -30,7 +30,7 @@ function Menu ({
         </li>
       </ul>
       <div id='create-room-container'>
-        <li>Create Room <a onClick={displayRoomInput}><i className='fa fa-plus' aria-hidden='true' /></a></li>
+        <li><a onClick={displayRoomInput}>Create Room</a></li>
       </div>
       <p className='menu-label'>
     Profile

@@ -115,8 +115,21 @@ function Lobby ({
       <div className='card testing p-10'>
         <header className='card-header'>
           <form name='messageForm' onSubmit={onSubmit}>
-            <input type='text' name='currentMessage' placeholder='Message' onChange={onChange} value={currentMessage} />
-            <button type='submit' className='button'>Send</button>
+          <div className="field has-addons">
+  <p className="control">
+  <a className="button is-static">
+  <i className="fa fa-commenting-o"></i>
+          </a>
+  </p>
+  <p className="control">
+  <input className='input' type='text' name='currentMessage' placeholder='Message' onChange={onChange} value={currentMessage} />
+  </p>
+  <p className="control">
+    <button className="button" type='submit'>
+    Send
+    </button>
+  </p>
+</div>
           </form>
         </header>
         <div className='card-content' />

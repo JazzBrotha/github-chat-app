@@ -24,7 +24,7 @@ class App extends Component {
     users: [],
     rooms: [],
     currentRoom: '',
-    roomId: ''
+    roomId: '',
   }
 
 // Custom Methods
@@ -50,7 +50,7 @@ class App extends Component {
       this.setState({
         currentMessage: '',
         username: '',
-        date: formattedDate
+        date: formattedDate,
       })
   }
 
@@ -109,6 +109,7 @@ class App extends Component {
     }
     room.users.push(this.state.user.email)
     roomsRef.push(room)
+    this.toggleRooms(room)
   }
 
   displayRoomInput = () => {
@@ -210,7 +211,7 @@ class App extends Component {
         document.getElementById('invite-user-modal').classList.remove('is-active')
 
         this.setState({
-          roomId: '', 
+          roomId: '',
         })
 
       } else {
