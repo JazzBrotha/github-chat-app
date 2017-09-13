@@ -30,13 +30,12 @@ function Menu ({
         </li>
       </ul>
       <div id='create-room-container'>
-        <li><a onClick={checkRoomInput}>Create Room</a></li>
+        <li><a onClick={checkRoomInput}>Create Room <i className='fa fa-plus-square' aria-hidden='true' /></a></li>
       </div>
       <p className='menu-label'>
     Profile
   </p>
       <ul className='menu-list'>
-        <li><a>View</a></li>
         <li><a onClick={onClick}>Log Out</a></li>
       </ul>
     </aside>

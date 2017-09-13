@@ -15,15 +15,22 @@ const closeModal = (modalId) => {
 }
 
 const displayRoomInput = () => {
-  const input = document.createElement('input')
-  input.setAttribute('type', 'text')
-  input.setAttribute('placeholder', 'Type room name and press enter')
-  get('#create-room-container').appendChild(input)
-  return input
+  if (get('#create-room-container').childNodes.length === 1) {
+    const input = document.createElement('input')
+    input.setAttribute('type', 'text')
+    input.setAttribute('class', 'input')
+    input.setAttribute('placeholder', 'Type room name and press enter')
+    get('#create-room-container').appendChild(input)
+    return input
+  }
 }
 
-const removeRoomInput = (input) => {
+const removeRoomInput = input => {
   get('#create-room-container').removeChild(input)
 }
 
-export {toggleActiveRoomLinkColors, closeModal, displayRoomInput, removeRoomInput}
+const addUserLeftMessage = user => {
+  get('#message-container').innerHTML = `<span>${user} left channel</span>`
+}
+
+export { toggleActiveRoomLinkColors, closeModal, displayRoomInput, removeRoomInput, addUserLeftMessage }

@@ -3,15 +3,24 @@ import '../containers/bulma.css'
 import '../containers/App.css'
 import firebase, { auth, provider } from '../api/firebase'
 import Header from '../components/header'
-import Navbar from '../components/navbar'
+import swal from 'sweetalert'
+
+// import Navbar from '../components/navbar'
 import Message from '../components/message'
 import Lobby from '../components/lobby'
-import UserProfile from '../components/userProfile'
-import AddItem from '../components/addItem'
+// import UserProfile from '../components/userProfile'
+// import AddItem from '../components/addItem'
 import Menu from '../components/menu'
-import DisplayItem from '../components/displayItem'
-import { toggleActiveRoomLinkColors, displayRoomInput, removeRoomInput } from '../utils/displays'
+import Notification from '../components/notification'
+// import DisplayItem from '../components/displayItem'
 import { createFormattedDate } from '../utils/helpers'
+import {
+  toggleActiveRoomLinkColors,
+  displayRoomInput,
+  removeRoomInput,
+  addUserLeftMessage 
+} from '../utils/displays'
+import Alert from '../utils/alerts'
 
 // Main class
 class App extends Component {
@@ -26,6 +35,7 @@ class App extends Component {
     rooms: [],
     currentRoom: '',
     roomId: '',
+    notification: ''
   }
 
 // Custom Methods
@@ -79,45 +89,71 @@ class App extends Component {
   }
 
   removeRoom = async (roomId) => {
-    const messagesSnapshot = await firebase.database()
-    .ref(`messages`)
-    .once('value')
-  
-  // Find messages that matches active room and remove
-  const messages = messagesSnapshot.val()
-  for (const message in messages) {
-    const messageRoom = messages[message].room
-    if (messageRoom === this.state.currentRoom) {
-      firebase.database().ref(`/messages/${message}`).remove()
-    }
-   }
-    const roomRef = firebase.database().ref(`/rooms/${roomId}`)
-    roomRef.remove()
+    swal({
+      title: `Are you sure you want to delete "${this.state.currentRoom}" ?`,
+      text: 'This cannot be undone',
+      icon: 'warning',
+      buttons: true,
+      dangerMode: true
+    })
+    .then(async willDelete => {
+      if (willDelete) {
+        const messagesSnapshot = await firebase.database()
+        .ref(`messages`)
+        .once('value')
+        
+        // Find messages that matches active room and remove
+        const messages = messagesSnapshot.val()
+        for (const message in messages) {
+          const messageRoom = messages[message].room
+          if (messageRoom === this.state.currentRoom) {
+            firebase.database().ref(`/messages/${message}`).remove()
+          }
+        }
+        const roomRef = firebase.database().ref(`/rooms/${roomId}`)
+        roomRef.remove()
+        swal('Room was deleted', {
+          icon: 'success'
+        })
+      }
+    })
   }
 
-  createRoom = name => {
+  createRoom = async name => {
     const roomsRef = firebase.database().ref('rooms')
-    const room = {
-      name: name,
-      users: [],
-      creator: this.state.user.email
-    }
-    room.users.push(this.state.user.email)
-    roomsRef.push(room)
-    this.toggleRooms(room)
+    const roomsSnapshot = await roomsRef
+      .orderByChild('name')
+      .equalTo(name)
+      .once('value')
+    
+      if (!roomsSnapshot.val()) {
+        const room = {
+          name: name,
+          users: [],
+          creator: this.state.user.email
+        }
+        room.users.push(this.state.user.email)
+        roomsRef.push(room)
+        Alert.roomCreated()
+        this.toggleRooms(room)
+      } else {
+        Alert.roomExists()
+      }
   }
 
   checkRoomInput = () => {
     const input = displayRoomInput()
-    input.addEventListener('keyup', (e) => {
-      if (input.value.length > 0) {
-        if (e.which === 13) {
-        this.createRoom(input.value)
-        removeRoomInput(input)
-        this.toggleRooms(input.value)
-      }
-      }
-    })
+    if (input) {
+      input.addEventListener('keyup', (e) => {
+        if (input.value.length > 0) {
+          if (e.which === 13) {
+          this.createRoom(input.value)
+          removeRoomInput(input)
+          this.toggleRooms(input.value)
+        }
+        }
+      })
+    }
   }
   toggleRooms = room => {
     room === 'Lobby'
@@ -229,6 +265,12 @@ class App extends Component {
       .ref(`rooms/${this.state.roomId}/users`)
       .set(roomUsers)
 
+    // Set room notification
+    // firebase.database()
+    //   .ref(`rooms/${this.state.roomId}/notification`)
+    //   .set('User left channel')
+
+      // addUserLeftMessage(this.state.user.email)
   }
 
 // Mountings
@@ -257,7 +299,7 @@ class App extends Component {
       })
     })
     const usersRef = firebase.database().ref('users')
-    usersRef.on('value', (snapshot) => {
+    usersRef.on('value', snapshot => {
       const users = snapshot.val()
       let userArr = []
       for (const user in users) {
@@ -307,6 +349,12 @@ class App extends Component {
               />
             </div>
             <div className='column is-10 p-0'>
+            { this.state.notification
+              ? <Notification
+                notification={this.state.notification}
+              />
+              : null
+            }
               <Lobby
                 onSubmit={this.handleSubmit}
                 messages={this.state.messages}

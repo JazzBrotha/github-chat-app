@@ -109,6 +109,7 @@ function Lobby ({
               }
             })
           }
+            <p id='message-container' />
           </div>
         </div>
         <div className='card-footer' />
@@ -116,21 +117,21 @@ function Lobby ({
       <div className='card testing p-10'>
         <header className='card-header'>
           <form name='messageForm' onSubmit={onSubmit}>
-          <div className="field has-addons">
-  <p className="control">
-  <a className="button is-static">
-  <i className="fa fa-commenting-o"></i>
-          </a>
-  </p>
-  <p className="control">
-  <input className='input' type='text' name='currentMessage' placeholder='Message' onChange={onChange} value={currentMessage} />
-  </p>
-  <p className="control">
-    <button className="button" type='submit'>
-    Send
-    </button>
-  </p>
-</div>
+            <div className='field has-addons'>
+              <p className='control'>
+                <a className='button is-static'>
+                  <i className='fa fa-commenting-o' />
+                </a>
+              </p>
+              <p className='control'>
+                <input className='input' type='text' name='currentMessage' placeholder='Message' onChange={onChange} value={currentMessage} />
+              </p>
+              <p className='control'>
+                <button className='button' type='submit'>
+                  Send
+                </button>
+              </p>
+            </div>
           </form>
         </header>
         <div className='card-content' />
