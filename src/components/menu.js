@@ -2,7 +2,7 @@ import React from 'react'
 function Menu ({
   onClick,
   src,
-  displayRoomInput,
+  checkRoomInput,
   rooms,
   username,
   toggleRooms
@@ -30,7 +30,7 @@ function Menu ({
         </li>
       </ul>
       <div id='create-room-container'>
-        <li><a onClick={displayRoomInput}>Create Room</a></li>
+        <li><a onClick={checkRoomInput}>Create Room</a></li>
       </div>
       <p className='menu-label'>
     Profile

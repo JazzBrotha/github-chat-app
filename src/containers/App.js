@@ -10,7 +10,8 @@ import UserProfile from '../components/userProfile'
 import AddItem from '../components/addItem'
 import Menu from '../components/menu'
 import DisplayItem from '../components/displayItem'
-import {toggleActiveRoomLinkColors} from '../utils/displays'
+import { toggleActiveRoomLinkColors, displayRoomInput, removeRoomInput } from '../utils/displays'
+import { createFormattedDate } from '../utils/helpers'
 
 // Main class
 class App extends Component {
@@ -31,26 +32,20 @@ class App extends Component {
   handleSubmit = e => {
     e.preventDefault()
     const messagesRef = firebase.database().ref('messages')
-    const date = new Date()
-    const day = date.getUTCDate() 
-    let year = date.getUTCFullYear()
-    let month = date.getUTCMonth()
-    month = ("0" + (month + 1)).slice(-2)
-    year = year.toString().substr(2,2) 
-    const formattedDate = day + '/' + month + "/" + year
+    const date = createFormattedDate()    
     
     const message = {
       body: this.state.currentMessage,
       username: this.state.user.email,
       profile_pic: this.state.user.photoURL,
-      date: formattedDate,
+      date: date,
       room: this.state.currentRoom
     }
       messagesRef.push(message)
       this.setState({
         currentMessage: '',
         username: '',
-        date: formattedDate,
+        date: date,
       })
   }
 
@@ -112,17 +107,13 @@ class App extends Component {
     this.toggleRooms(room)
   }
 
-  displayRoomInput = () => {
-    const input = document.createElement('input')
-    input.setAttribute('type', 'text')
-    input.setAttribute('placeholder', 'Type room name and press enter')
-    const createRoomContainer = document.getElementById('create-room-container')
-    createRoomContainer.appendChild(input)
+  checkRoomInput = () => {
+    const input = displayRoomInput()
     input.addEventListener('keyup', (e) => {
       if (input.value.length > 0) {
         if (e.which === 13) {
         this.createRoom(input.value)
-        createRoomContainer.removeChild(input)
+        removeRoomInput(input)
         this.toggleRooms(input.value)
       }
       }
@@ -219,6 +210,27 @@ class App extends Component {
       }
     }
 
+  leaveRoom = async roomId => {
+    const roomSnapshot = await firebase.database()
+    .ref(`rooms/${this.state.roomId}/users`)
+    .once('value')
+    
+    // Get room users' value
+    let roomUsers = roomSnapshot.val()
+    
+    // Get array index of user
+    const index = roomUsers.indexOf(this.state.user.email)
+
+    // Remove user from room
+    roomUsers.splice(1, index)
+          
+    // Update db ref
+    firebase.database()
+      .ref(`rooms/${this.state.roomId}/users`)
+      .set(roomUsers)
+
+  }
+
 // Mountings
   componentDidMount = () => {
     auth.onAuthStateChanged((user) => {
@@ -274,8 +286,8 @@ class App extends Component {
     }
     this.setState({
       rooms: roomsArr,
-      currentRoom: 'Lobby'
     })
+    this.toggleRooms('Lobby')
   })
   }
 
@@ -288,7 +300,7 @@ class App extends Component {
             <div className='column is-2 p-0'>
               <Menu
                 onClick={this.logout}
-                displayRoomInput={this.displayRoomInput}
+                checkRoomInput={this.checkRoomInput}
                 rooms={this.state.rooms}
                 username = {this.state.user.email}
                 toggleRooms = {this.toggleRooms}
@@ -308,6 +320,7 @@ class App extends Component {
                 roomId = {this.state.roomId}                
                 inviteUser = {this.inviteUser}
                 submitInviteUser = {this.submitInviteUser}
+                leaveRoom = {this.leaveRoom}
               />
             </div>
           </div>

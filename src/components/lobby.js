@@ -1,5 +1,5 @@
 import React from 'react'
-import { closeModal } from '../utils/handlers.js'
+import { closeModal } from '../utils/displays.js'
 function Lobby ({
   onSubmit,
   onChange,
@@ -12,7 +12,8 @@ function Lobby ({
   submitInviteUser,
   roomCreator,
   roomId,
-  removeRoom
+  removeRoom,
+  leaveRoom
 }) {
   return (
     <div>
@@ -66,7 +67,7 @@ function Lobby ({
                 </span>
                    Delete Room
                  </a>
-              : <a className='navbar-item'>
+              : <a onClick={() => leaveRoom(roomId)} className='navbar-item'>
                 <span className='bd-emoji mr-5'>
                   <i className='fa fa-sign-out' aria-hidden='true' />
                 </span>
