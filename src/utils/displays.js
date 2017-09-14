@@ -1,17 +1,12 @@
 import { get } from './helpers'
 
-const toggleActiveRoomLinkColors = (room) => {
+const toggleActiveRoomLinkColors = room => {
   const roomLinkItems = Array.from(get('.room-link-item'))
   roomLinkItems.forEach(item =>
     (item.innerText === room)
     ? item.classList.add('is-active')
     : item.classList.remove('is-active')
   )
-}
-
-const closeModal = (modalId) => {
-  const modal = document.getElementById(modalId)
-  modal.classList.remove('is-active')
 }
 
 const displayRoomInput = () => {
@@ -33,4 +28,28 @@ const addUserLeftMessage = user => {
   get('#message-container').innerHTML = `<span>${user} left channel</span>`
 }
 
-export { toggleActiveRoomLinkColors, closeModal, displayRoomInput, removeRoomInput, addUserLeftMessage }
+const removeClass = (element, className) => {
+  get(element).classList.remove(className)
+}
+
+const addClass = (element, className) => {
+  get(element).classList.add(className)
+}
+
+const changeInnerHtml = (element, operator, html) => {
+  if (operator === '=') {
+    get(element).innerHTML = html
+  } else {
+    get(element).innerHTML += html
+  }
+}
+
+export {
+  toggleActiveRoomLinkColors,
+  displayRoomInput,
+  removeRoomInput,
+  addUserLeftMessage,
+  removeClass,
+  addClass,
+  changeInnerHtml
+}

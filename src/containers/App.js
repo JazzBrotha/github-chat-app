@@ -4,21 +4,19 @@ import '../containers/App.css'
 import firebase, { auth, provider } from '../api/firebase'
 import Header from '../components/header'
 import swal from 'sweetalert'
-
-// import Navbar from '../components/navbar'
-import Message from '../components/message'
-import Lobby from '../components/lobby'
-// import UserProfile from '../components/userProfile'
-// import AddItem from '../components/addItem'
+import Chat from '../components/chat'
 import Menu from '../components/menu'
 import Notification from '../components/notification'
-// import DisplayItem from '../components/displayItem'
-import { createFormattedDate } from '../utils/helpers'
+import inviteUserModal from '../components/inviteUserModal'
+import { get } from '../utils/helpers'
 import {
   toggleActiveRoomLinkColors,
   displayRoomInput,
   removeRoomInput,
-  addUserLeftMessage 
+  addUserLeftMessage,
+  removeClass,
+  addClass,
+  changeInnerHtml 
 } from '../utils/displays'
 import Alert from '../utils/alerts'
 
@@ -42,7 +40,7 @@ class App extends Component {
   handleSubmit = e => {
     e.preventDefault()
     const messagesRef = firebase.database().ref('messages')
-    const date = createFormattedDate()    
+    const date = new Date().toLocaleString()  
     
     const message = {
       body: this.state.currentMessage,
@@ -90,7 +88,7 @@ class App extends Component {
 
   removeRoom = async (roomId) => {
     swal({
-      title: `Are you sure you want to delete "${this.state.currentRoom}" ?`,
+      title: `Are you sure you want to delete "${this.state.currentRoom}"?`,
       text: 'This cannot be undone',
       icon: 'warning',
       buttons: true,
@@ -112,9 +110,7 @@ class App extends Component {
         }
         const roomRef = firebase.database().ref(`/rooms/${roomId}`)
         roomRef.remove()
-        swal('Room was deleted', {
-          icon: 'success'
-        })
+        Alert.roomDeleted()
       }
     })
   }
@@ -171,7 +167,7 @@ class App extends Component {
   }
 
   inviteUser = async () => {
-    document.getElementById('invite-user-modal').classList.add('is-active')
+    addClass('#invite-user-modal', 'is-active')
     const roomsRef = firebase.database().ref('rooms')
     const usersRef = firebase.database().ref('users')
     let roomUsers
@@ -203,22 +199,21 @@ class App extends Component {
     const usersSnapshot = await usersRef.once('value')
     const usersObj = usersSnapshot.val()
 
-    document.getElementById('users-select').innerHTML = '<option>User</option>'
+    changeInnerHtml('#users-select', '=', '<option>User</option>')
 
     // Find users that are not in the selected room
       for (const user in usersObj) {
         if (!roomUsers.includes(usersObj[user])) {
-          document.getElementById('users-select').innerHTML += `<option>${usersObj[user]}</option>`
+          changeInnerHtml('#users-select', '+', `<option>${usersObj[user]}</option>`)
         }
       }
     }
 
     submitInviteUser = async () => {
-      const userSelectValue = document.getElementById('users-select').value
-      const errorContainer = document.getElementById('error-container')
+      const userSelectValue = get('#users-select').value
+      // Check if a user is selected
       if (userSelectValue !== 'User') {
-        errorContainer.innerHTML = ``
-        
+        changeInnerHtml('#error-container', '=', '')
         // Get room users' snapshot
         const roomSnapshot = await firebase.database()
           .ref(`rooms/${this.state.roomId}/users`)
@@ -235,14 +230,16 @@ class App extends Component {
           .ref(`rooms/${this.state.roomId}/users`)
           .set(roomUsers)
 
-        document.getElementById('invite-user-modal').classList.remove('is-active')
+        removeClass('#invite-user-modal', 'is-active')
 
         this.setState({
           roomId: '',
         })
 
+        Alert.invitationSent(userSelectValue)
+
       } else {
-      errorContainer.innerHTML = `<p>Please select a user</p>`       
+      changeInnerHtml('#error-container', '=', '<p>Please select a user</p>')       
       }
     }
 
@@ -257,20 +254,35 @@ class App extends Component {
     // Get array index of user
     const index = roomUsers.indexOf(this.state.user.email)
 
-    // Remove user from room
-    roomUsers.splice(1, index)
-          
-    // Update db ref
-    firebase.database()
-      .ref(`rooms/${this.state.roomId}/users`)
-      .set(roomUsers)
+    swal({
+      title: `Are you sure you want to leave "${this.state.currentRoom}"?`,
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    })
+    .then(willDelete => {
+      if (willDelete) {
+        const room = this.state.currentRoom
+        // Remove user from room
+        roomUsers.splice(1, index)        
+        
+        // Update db ref
+        firebase.database()
+          .ref(`rooms/${this.state.roomId}/users`)
+          .set(roomUsers)
+
+        swal("Left", {
+          icon: "success",
+          text: `Left "${room}"` 
+        })
+      }
+    })
 
     // Set room notification
     // firebase.database()
     //   .ref(`rooms/${this.state.roomId}/notification`)
     //   .set('User left channel')
-
-      // addUserLeftMessage(this.state.user.email)
+    // addUserLeftMessage(this.state.user.email)
   }
 
 // Mountings
@@ -355,8 +367,8 @@ class App extends Component {
               />
               : null
             }
-              <Lobby
-                onSubmit={this.handleSubmit}
+              <Chat
+                submitMessage={this.handleSubmit}
                 messages={this.state.messages}
                 onChange = {this.handleChange}
                 username = {this.state.user.email}
@@ -369,7 +381,10 @@ class App extends Component {
                 inviteUser = {this.inviteUser}
                 submitInviteUser = {this.submitInviteUser}
                 leaveRoom = {this.leaveRoom}
-              />
+                currentRoom = {this.state.currentRoom}
+                submitInviteUser = {this.submitInviteUser}
+                inviteUserModal={inviteUserModal}
+                />
             </div>
           </div>
           : <div className='container'>

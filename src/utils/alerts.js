@@ -12,22 +12,15 @@ export default {
       text: 'Room already exists'
     })
   },
-  deleteRoom: (room) => {
-    swal({
-      title: `Are you sure you want to delete "${room}" ?`,
-      text: 'This cannot be undone',
-      icon: 'warning',
-      buttons: true,
-      dangerMode: true
+  roomDeleted: () => {
+    swal('Room was deleted', {
+      icon: 'success'
     })
-    .then(willDelete => {
-      if (willDelete) {
-        swal('Room was deleted', {
-          icon: 'success'
-        })
-      } else {
-        swal('Delete room aborted')
-      }
+  },
+  invitationSent: user => {
+    swal({
+      icon: 'success',
+      text: `Invitation sent to ${user}`
     })
   }
 }
