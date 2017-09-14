@@ -1,18 +1,34 @@
 import React from 'react'
 
 function Messages ({ messages, currentRoom, removeMessage, username }) {
+  const ownMessage = {
+    backgroundColor: 'green',
+    color: 'white'
+  }
+  const noMargin = {
+    margin: 0
+  }
   return (
     <div>
-      { messages.map(message => {
+      { messages.map((message, index) => {
         if (message.room === currentRoom) {
           return (
             <article key={message.id} className='media'>
-              <figure className='media-left' style={{ margin: 0 }}>
-                <p className='image is-64x64'>
-                  <img src={message.profile_pic} />
-                </p>
-              </figure>
-              <div className='media-content'>
+              { index > 0
+              ? messages[index].username !== messages[index - 1].username
+                ? <figure className='media-left' style={noMargin}>
+                  <p className='image is-64x64'>
+                    <img src={message.profile_pic} />
+                  </p>
+                </figure>
+                : null
+                : <figure className='media-left' style={noMargin}>
+                  <p className='image is-64x64'>
+                    <img src={message.profile_pic} />
+                  </p>
+                </figure>
+                }
+              <div className='media-content'style={username === message.username ? ownMessage : null} >
                 <div className='content'>
                   <p>
                     <strong>{message.username}</strong>
@@ -31,7 +47,7 @@ function Messages ({ messages, currentRoom, removeMessage, username }) {
                   ? <div className='media-right'>
                     <button onClick={() => removeMessage(message.id)} className='delete' />
                   </div>
-                  : <div />
+                  : null
                 }
             </article>
           )

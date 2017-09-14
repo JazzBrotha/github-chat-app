@@ -165,58 +165,59 @@ class App extends Component {
     })
     toggleActiveRoomLinkColors(room.name || 'Lobby')
   }
-
+  
   inviteUser = async () => {
     addClass('#invite-user-modal', 'is-active')
     const roomsRef = firebase.database().ref('rooms')
     const usersRef = firebase.database().ref('users')
     let roomUsers
     let roomId
-
+    
     // Find room snapshot
     const roomSnapshot = await roomsRef
-      .orderByChild('name')
-      .equalTo(this.state.currentRoom)
-      .once('value')
-
+    .orderByChild('name')
+    .equalTo(this.state.currentRoom)
+    .once('value')
+    
     // Get room object
     const roomObj = roomSnapshot.val()
-
+    
     // Assign room key
     for (const prop in roomObj) {
       roomId = prop
-      }
-
+    }
+    
     this.setState({
       roomId: roomId
     })
-
+    
     // Assign room users
     roomSnapshot.forEach(data => {
       roomUsers = data.val().users
     })
-
+    
     const usersSnapshot = await usersRef.once('value')
     const usersObj = usersSnapshot.val()
-
+    
     changeInnerHtml('#users-select', '=', '<option>User</option>')
-
+    
     // Find users that are not in the selected room
-      for (const user in usersObj) {
-        if (!roomUsers.includes(usersObj[user])) {
-          changeInnerHtml('#users-select', '+', `<option>${usersObj[user]}</option>`)
-        }
+    for (const user in usersObj) {
+      if (!roomUsers.includes(usersObj[user])) {
+        changeInnerHtml('#users-select', '+', `<option>${usersObj[user]}</option>`)
       }
     }
-
-    submitInviteUser = async () => {
-      const userSelectValue = get('#users-select').value
-      // Check if a user is selected
-      if (userSelectValue !== 'User') {
-        changeInnerHtml('#error-container', '=', '')
-        // Get room users' snapshot
-        const roomSnapshot = await firebase.database()
-          .ref(`rooms/${this.state.roomId}/users`)
+  }
+  
+  submitInviteUser = async () => {
+    const room = this.state.currentRoom
+    const userSelectValue = get('#users-select').value
+    // Check if a user is selected
+    if (userSelectValue !== 'User') {
+      changeInnerHtml('#error-container', '=', '')
+      // Get room users' snapshot
+      const roomSnapshot = await firebase.database()
+      .ref(`rooms/${this.state.roomId}/users`)
           .once('value')
         
         // Get room users' value
@@ -231,13 +232,12 @@ class App extends Component {
           .set(roomUsers)
 
         removeClass('#invite-user-modal', 'is-active')
-
-        this.setState({
-          roomId: '',
-        })
-
+        
+        // this.setState({
+        //   roomId: '',
+        // })
+        
         Alert.invitationSent(userSelectValue)
-
       } else {
       changeInnerHtml('#error-container', '=', '<p>Please select a user</p>')       
       }
