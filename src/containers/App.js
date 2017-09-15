@@ -7,7 +7,7 @@ import swal from 'sweetalert'
 import Chat from '../components/chat'
 import Navbar from '../components/navbar'
 import Notification from '../components/notification'
-import inviteUserModal from '../components/inviteUserModal'
+import InviteUserModal from '../components/inviteUserModal'
 import SendMessageCard from '../components/sendMessageCard'
 import { get } from '../utils/helpers'
 import {
@@ -353,6 +353,10 @@ class App extends Component {
       <div className='app'>
         { this.state.user
           ? <div className='modal is-active'>
+            <InviteUserModal
+              currentRoom = {this.state.currentRoom}
+              submitInviteUser = {this.submitInviteUser}
+            />
             <div className="modal-background"></div>
             <div className='modal-card'>
               <Navbar
@@ -388,7 +392,7 @@ class App extends Component {
               username = {this.state.user.email}
               checkRoomInput = {this.checkRoomInput}
               inviteUser = {this.inviteUser}
-              roomCreator = {this.roomCreator}
+              roomCreator = {this.state.roomCreator}
               removeRoom = {this.removeRoom} 
               leaveRoom = {this.leaveRoom}
               roomId = {this.state.roomId} 

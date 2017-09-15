@@ -33,7 +33,7 @@ function Menu ({
         </span>
           Delete Room
         </a>
-      : <a onClick={() => leaveRoom(roomId)} className='card-footer-item'>
+      : <a onClick={() => leaveRoom(roomId)} className='card-footer-item' style={footerButton}>
         <span className='bd-emoji mr-5'>
           <i className='fa fa-sign-out' />
         </span>

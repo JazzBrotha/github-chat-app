@@ -42,7 +42,14 @@ function SendMessageCard ({
             </form>
       </header>
       { currentRoom !== 'Lobby'
-            ? <Menu />
+            ? <Menu
+              leaveRoom={leaveRoom}
+              removeRoom={removeRoom}
+              inviteUser={inviteUser}
+              roomCreator={roomCreator}
+              username={username}
+              roomId={roomId}
+            />
             : null
             }
     </div>
