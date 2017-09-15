@@ -9,6 +9,7 @@ import Menu from '../components/menu'
 import Navbar from '../components/navbar'
 import Notification from '../components/notification'
 import inviteUserModal from '../components/inviteUserModal'
+import SendMessageCard from '../components/sendMessageCard'
 import { get } from '../utils/helpers'
 import {
   toggleActiveRoomLinkColors,
@@ -363,26 +364,29 @@ class App extends Component {
                 rooms = {this.state.rooms}
               />
             <section className="modal-card-body">
-              <Chat
+            { this.state.messages.map((message, index) => {
+              return (
+                message.room === this.state.currentRoom
+              ? <Chat
                 submitMessage ={this.handleSubmit}
-                messages ={this.state.messages}
+                message = {message}
+                key={message.id}
                 onChange = {this.handleChange}
                 username = {this.state.user.email}
                 currentMessage = {this.state.currentMessage}
-                removeMessage = {this.removeMessage}
-                removeRoom = {this.removeRoom}                
-                currentRoom = {this.state.currentRoom}
-                roomCreator = {this.state.roomCreator}
-                roomId = {this.state.roomId}                
-                inviteUser = {this.inviteUser}
-                submitInviteUser = {this.submitInviteUser}
-                leaveRoom = {this.leaveRoom}
-                currentRoom = {this.state.currentRoom}
-                submitInviteUser = {this.submitInviteUser}
-                inviteUserModal = {inviteUserModal}
+                removeMessage = {this.removeMessage}               
                 />
+                : null
+              )
+            })
+          }
             </section>
             <footer className="modal-card-foot">
+            <SendMessageCard
+              submitMessage={this.handleSubmit}
+              onChange={this.handleChange}
+              currentMessage={this.state.currentMessage}
+            />
             { this.state.currentRoom !== 'Lobby'
             ? <Menu
                 onClick = {this.logout}
