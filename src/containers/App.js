@@ -6,6 +6,7 @@ import Header from '../components/header'
 import swal from 'sweetalert'
 import Chat from '../components/chat'
 import Menu from '../components/menu'
+import Navbar from '../components/navbar'
 import Notification from '../components/notification'
 import inviteUserModal from '../components/inviteUserModal'
 import { get } from '../utils/helpers'
@@ -285,6 +286,7 @@ class App extends Component {
     // addUserLeftMessage(this.state.user.email)
   }
 
+
 // Mountings
   componentDidMount = () => {
     auth.onAuthStateChanged((user) => {
@@ -350,26 +352,20 @@ class App extends Component {
     return (
       <div className='app'>
         { this.state.user
-          ? <div className='columns'>
-            <div className='column is-2 p-0'>
-              <Menu
-                onClick={this.logout}
-                checkRoomInput={this.checkRoomInput}
-                rooms={this.state.rooms}
+          ? <div className='modal is-active'>
+            <div className="modal-background"></div>
+            <div className='modal-card'>
+              <Navbar
+                currentRoom = {this.state.currentRoom}
+                logout = {this.logout}
                 username = {this.state.user.email}
                 toggleRooms = {this.toggleRooms}
+                rooms = {this.state.rooms}
               />
-            </div>
-            <div className='column is-10 p-0'>
-            { this.state.notification
-              ? <Notification
-                notification={this.state.notification}
-              />
-              : null
-            }
+            <section className="modal-card-body">
               <Chat
-                submitMessage={this.handleSubmit}
-                messages={this.state.messages}
+                submitMessage ={this.handleSubmit}
+                messages ={this.state.messages}
                 onChange = {this.handleChange}
                 username = {this.state.user.email}
                 currentMessage = {this.state.currentMessage}
@@ -383,14 +379,32 @@ class App extends Component {
                 leaveRoom = {this.leaveRoom}
                 currentRoom = {this.state.currentRoom}
                 submitInviteUser = {this.submitInviteUser}
-                inviteUserModal={inviteUserModal}
+                inviteUserModal = {inviteUserModal}
                 />
-            </div>
+            </section>
+            <footer className="modal-card-foot">
+            { this.state.currentRoom !== 'Lobby'
+            ? <Menu
+                onClick = {this.logout}
+                checkRoomInput = {this.checkRoomInput}
+                rooms = {this.state.rooms}
+                username = {this.state.user.email}
+                toggleRooms = {this.toggleRooms}
+                inviteUser = {this.inviteUser}
+                roomCreator = {this.roomCreator}
+                removeRoom = {this.removeRoom} 
+                leaveRoom = {this.leaveRoom}
+                roomId = {this.state.roomId} 
+              />
+            : null
+            }
+            </footer>
           </div>
+        </div>
           : <div className='container'>
             <Header
               name='Login'
-              login={this.login}
+              login = {this.login}
             />
           </div>
         }

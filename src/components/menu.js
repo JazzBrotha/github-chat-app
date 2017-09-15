@@ -5,15 +5,45 @@ function Menu ({
   checkRoomInput,
   rooms,
   username,
-  toggleRooms
+  toggleRooms,
+  inviteUser,
+  roomCreator,
+  leaveRoom,
+  removeRoom,
+  roomId
 }) {
   return (
-    <aside className='menu message-menu'>
-      <p className='menu-label'>
-    Rooms
-      </p>
-      <ul className='menu-list'>
+    <div className='tabs is-centered is-boxed'>
+      <ul>
+        <li className='is-active'>
+          <a onClick={checkRoomInput}>
+            <span className='icon is-small'><i className='fa fa-plus-square' /></span>
+            <span>Create Room</span>
+          </a>
+        </li>
         <li>
+          <a onClick={inviteUser}>
+            <span className='icon is-small'><i className='fa fa-user-plus' /></span>
+            <span>Invite User</span>
+          </a>
+        </li>
+        <li>
+          { roomCreator === username
+        ? <a onClick={() => removeRoom(roomId)}>
+          <span className='icon is-small'><i className='fa fa-trash' /></span>
+          <span>Delete Room</span>
+        </a>
+        : <a onClick={() => leaveRoom(roomId)}>
+          <span className='icon is-small'><i className='fa fa-sign-out' /></span>
+          <span>Leave Room</span>
+        </a>
+        }
+        </li>
+        <li>
+          <a>
+            <span className='icon is-small'><i className='fa fa-user-plus' /></span>
+            <span>Invite User</span>
+          </a>
           <ul id='room-list'>
             <li onClick={() => toggleRooms('Lobby')}><a className='room-link-item'>Lobby</a></li>
             { rooms.map(room => {
@@ -29,16 +59,8 @@ function Menu ({
           </ul>
         </li>
       </ul>
-      <div id='create-room-container'>
-        <li><a onClick={checkRoomInput}>Create Room <i className='fa fa-plus-square' aria-hidden='true' /></a></li>
-      </div>
-      <p className='menu-label'>
-    Profile
-  </p>
-      <ul className='menu-list'>
-        <li><a onClick={onClick}>Log Out</a></li>
-      </ul>
-    </aside>
+      }
+  </div>
   )
 }
 export default Menu

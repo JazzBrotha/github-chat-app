@@ -2,11 +2,15 @@ import React from 'react'
 
 function Messages ({ messages, currentRoom, removeMessage, username }) {
   const ownMessage = {
-    backgroundColor: 'green',
-    color: 'white'
+    backgroundColor: 'whitesmoke',
+    padding: '10px'
   }
   const noMargin = {
     margin: 0
+  }
+
+  const floatRight = {
+    float: 'right'
   }
   return (
     <div>
@@ -28,8 +32,8 @@ function Messages ({ messages, currentRoom, removeMessage, username }) {
                   </p>
                 </figure>
                 }
-              <div className='media-content'style={username === message.username ? ownMessage : null} >
-                <div className='content'>
+              <div className='media-content'>
+                <div className='content' style={username === message.username ? ownMessage : floatRight}>
                   <p>
                     <strong>{message.username}</strong>
                     <small>

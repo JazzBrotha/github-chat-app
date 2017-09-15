@@ -19,16 +19,8 @@ function Chat ({
 }) {
   return (
     <div>
-      <InviteUserModal currentRoom={currentRoom} submitInviteUser={submitInviteUser} />
-      <div className='card test p-10'>
-        <header className='card-header bs-none'>
-          <nav className='navbar' role='navigation' aria-label='navigation'>
-            <div className='navbar-item'>
-              <h3 className='title is-3'>{currentRoom}</h3>
-            </div>
-          </nav>
-        </header>
-        { currentRoom !== 'Lobby'
+      {/* <InviteUserModal currentRoom={currentRoom} submitInviteUser={submitInviteUser} /> */}
+      {/* { currentRoom !== 'Lobby'
         ? <header className='card-header'>
           <nav className='navbar' role='navigation' aria-label='navigation'>
             <a onClick={inviteUser} className='navbar-item'>
@@ -54,19 +46,14 @@ function Chat ({
           </nav>
         </header>
         : null
-        }
-        <div className='card-content'>
-          <div className='content'>
-            <Messages
-              messages={messages}
-              removeMessage={removeMessage}
-              username={username}
-              currentRoom={currentRoom}
+        } */}
+      <Messages
+        messages={messages}
+        removeMessage={removeMessage}
+        username={username}
+        currentRoom={currentRoom}
             />
-            <p id='message-container' />
-          </div>
-        </div>
-      </div>
+      <p id='message-container' />
       <SendMessageCard
         submitMessage={submitMessage}
         onChange={onChange}
