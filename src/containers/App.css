@@ -30,3 +30,7 @@ li {
 .card-header.bs-none {
   box-shadow: none;
 }
+
+a.card-footer-item:hover {
+  background-color: #2366d1 !important;
+}

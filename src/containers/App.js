@@ -5,7 +5,6 @@ import firebase, { auth, provider } from '../api/firebase'
 import Header from '../components/header'
 import swal from 'sweetalert'
 import Chat from '../components/chat'
-import Menu from '../components/menu'
 import Navbar from '../components/navbar'
 import Notification from '../components/notification'
 import inviteUserModal from '../components/inviteUserModal'
@@ -381,27 +380,20 @@ class App extends Component {
             })
           }
             </section>
-            <footer className="modal-card-foot">
+            <footer className="modal-card-footer">
             <SendMessageCard
               submitMessage={this.handleSubmit}
               onChange={this.handleChange}
               currentMessage={this.state.currentMessage}
+              username = {this.state.user.email}
+              checkRoomInput = {this.checkRoomInput}
+              inviteUser = {this.inviteUser}
+              roomCreator = {this.roomCreator}
+              removeRoom = {this.removeRoom} 
+              leaveRoom = {this.leaveRoom}
+              roomId = {this.state.roomId} 
+              currentRoom = {this.state.currentRoom}
             />
-            { this.state.currentRoom !== 'Lobby'
-            ? <Menu
-                onClick = {this.logout}
-                checkRoomInput = {this.checkRoomInput}
-                rooms = {this.state.rooms}
-                username = {this.state.user.email}
-                toggleRooms = {this.toggleRooms}
-                inviteUser = {this.inviteUser}
-                roomCreator = {this.roomCreator}
-                removeRoom = {this.removeRoom} 
-                leaveRoom = {this.leaveRoom}
-                roomId = {this.state.roomId} 
-              />
-            : null
-            }
             </footer>
           </div>
         </div>

@@ -5,7 +5,7 @@ function Messages ({ message, key }) {
     margin: '10px'
   }
   const otherMessage = {
-    backgroundColor: '#3273dc',
+    backgroundColor: '#00c4a7',
     padding: '10px'
   }
   return (
