@@ -16,6 +16,7 @@ import {
   changeInnerHtml,
   getRoomInput 
 } from '../utils/displays'
+import { scrollToBottom } from '../utils/events'
 import Alert from '../utils/alerts'
 
 // Main class
@@ -34,23 +35,34 @@ class App extends Component {
   }
 
 // Custom Methods
-  handleSubmit = e => {
+  handleSubmit = async e => {
     e.preventDefault()
-    const messagesRef = firebase.database().ref('messages')
-    const date = new Date().toLocaleString()  
-    
-    const message = {
-      body: this.state.currentMessage,
-      username: this.state.user.email,
-      profile_pic: this.state.user.photoURL,
-      date: date,
-      room: this.state.currentRoom || 'Lobby'
+    const length = this.state.currentMessage.trim().length
+    if (length > 0) {
+      try {
+        const messagesRef = firebase.database().ref('messages')
+        const date = new Date().toLocaleString()  
+        
+        const message = {
+          body: this.state.currentMessage.trim(),
+          username: this.state.user.email,
+          profile_pic: this.state.user.photoURL,
+          date: date,
+          room: this.state.currentRoom || 'Lobby'
+        }
+          messagesRef.push(message)
+          this.setState({
+            currentMessage: '',
+            date: date,
+          })
+          scrollToBottom()
+      } catch (err) {
+        console.log(err)
+        Alert.displayError('Sorry, could not create message')
+      } 
+    } else {
+      Alert.displayError('Message empty')
     }
-      messagesRef.push(message)
-      this.setState({
-        currentMessage: '',
-        date: date,
-      })
   }
 
   handleChange = e => {
@@ -59,27 +71,43 @@ class App extends Component {
     })
   }
 
-  logout = () => {
-    auth.signOut()
-    .then(() => {
-      this.setState({
-        user: null
+  logout = async () => {
+    try {
+      auth.signOut()
+      .then(() => {
+        this.setState({
+          user: null
+        })
       })
-    })
+    } catch(err) {
+      console.log(err)
+      Alert.displayError('Sorry, could not logout')            
+    }
+
   }
-  login = () => {
-    auth.signInWithRedirect(provider)
-    .then(result => {
-      const user = result.user
-      this.setState({
-        user
+  login = async () => {
+    try {
+      auth.signInWithRedirect(provider)
+      .then(result => {
+        const user = result.user
+        this.setState({
+          user
+        })
       })
-    })
+   } catch (err) {
+     console.log(err)
+     Alert.displayError('Sorry, could not login')                 
+   }
   }
 
-  removeMessage = messageId => {
-    const messageRef = firebase.database().ref(`/messages/${messageId}`)
-    messageRef.remove()
+  removeMessage = async messageId => {
+    try {
+      const messageRef = firebase.database().ref(`/messages/${messageId}`)
+      messageRef.remove()
+    } catch (err) {
+      console.log(err)
+      Alert.displayError('Sorry, could not remove message')      
+    }
   }
 
   removeRoom = async (roomId) => {
@@ -94,35 +122,42 @@ class App extends Component {
     })
     .then(async willDelete => {
       if (willDelete) {
-        const messagesSnapshot = await firebase.database()
-        .ref(`messages`)
-        .once('value')
-        
-        // Find messages that matches active room and remove
-        const messages = messagesSnapshot.val()
-        for (const message in messages) {
-          const messageRoom = messages[message].room
-          if (messageRoom === this.state.currentRoom) {
-            firebase.database().ref(`/messages/${message}`).remove()
+        try {
+          const messagesSnapshot = await firebase.database()
+          .ref(`messages`)
+          .once('value')
+          
+          // Find messages that matches active room and remove
+          const messages = messagesSnapshot.val()
+          for (const message in messages) {
+            const messageRoom = messages[message].room
+            if (messageRoom === this.state.currentRoom) {
+              firebase.database().ref(`/messages/${message}`).remove()
+            }
           }
+          const roomRef = firebase.database().ref(`/rooms/${roomId}`)
+          roomRef.remove()
+          Alert.roomDeleted()
+          this.toggleRooms('Lobby')
+        } catch (err) {
+          console.log(err)
+          Alert.displayError('Sorry, could not remove room')
         }
-        const roomRef = firebase.database().ref(`/rooms/${roomId}`)
-        roomRef.remove()
-        Alert.roomDeleted()
-        this.toggleRooms('Lobby')
       }
     })
   }
 
   createRoom = async name => {
-    const roomsRef = firebase.database().ref('rooms')
-
-    // Check if room name exists
-    const roomsSnapshot = await roomsRef
-      .orderByChild('name')
-      .equalTo(name)
-      .once('value')
-
+    if (name.length > 0) {
+    try {
+      const roomsRef = firebase.database().ref('rooms')
+  
+      // Check if room name exists
+      const roomsSnapshot = await roomsRef
+        .orderByChild('name')
+        .equalTo(name)
+        .once('value')
+  
       if (!roomsSnapshot.val()) {
         const room = {
           name: name,
@@ -142,6 +177,13 @@ class App extends Component {
       } else {
         Alert.roomExists()
       }
+    } catch (err) {
+      console.log(err)
+      Alert.displayError('Sorry, could not create room')      
+    }
+  } else {
+    Alert.displayError('Room name empty')
+  }
   }
 
   submitCreateRoom = () => {
@@ -212,94 +254,105 @@ class App extends Component {
   }
   
   submitInviteUser = async () => {
-    const room = this.state.currentRoom
-    const userSelectValue = get('#users-select').value
-    // Check if a user is selected
-    if (userSelectValue !== 'User') {
-      changeInnerHtml('#error-container', '=', '')
-      // Get room users' snapshot
-      const roomSnapshot = await firebase.database()
-        .ref(`rooms/${this.state.roomId}/users`)
-        .once('value')
-        
-        // Get room users' value
-        let roomUsers = roomSnapshot.val()
+    try {
+      const room = this.state.currentRoom
+      const userSelectValue = get('#users-select').value
 
-        // Add new room user
-        roomUsers.push(userSelectValue)
+      // Check if a user is selected
+      if (userSelectValue !== 'User') {
+        changeInnerHtml('#error-container', '=', '')
 
-        // Update db ref
-        firebase.database()
+        // Get room users' snapshot
+        const roomSnapshot = await firebase.database()
           .ref(`rooms/${this.state.roomId}/users`)
-          .set(roomUsers)
-
-        removeClass('#invite-user-modal', 'is-active')
-        
-        Alert.invitationSent(userSelectValue)
-        const messagesRef = firebase.database().ref('messages')
-        
-        // Add join message to room
-        const message = {
-          body: `${userSelectValue} joined room`,
-          room: this.state.currentRoom,
-          date: '',
-          profile_pic: '',
-          username: ''
-        }
-          messagesRef.push(message)
-      } else {
-      changeInnerHtml('#error-container', '=', '<p>Please select a user</p>')       
-      }
-    }
-
-  leaveRoom = async roomId => {
-    const roomSnapshot = await firebase.database()
-    .ref(`rooms/${this.state.roomId}/users`)
-    .once('value')
-    
-    // Get room users' value
-    let roomUsers = roomSnapshot.val()
-    
-    // Get array index of user
-    const index = roomUsers.indexOf(this.state.user.email)
-
-    // Confirm message
-    swal({
-      title: `Are you sure you want to leave "${this.state.currentRoom}"?`,
-      icon: "warning",
-      buttons: true,
-      dangerMode: true,
-    })
-    .then(willDelete => {
-      if (willDelete) {
-        const room = this.state.currentRoom
-        // Remove user from room
-        roomUsers.splice(1, index)        
-        
-        // Update db ref
-        firebase.database()
-          .ref(`rooms/${this.state.roomId}/users`)
-          .set(roomUsers)
-
+          .once('value')
+          
+          // Get room users' value
+          let roomUsers = roomSnapshot.val()
+  
+          // Add new room user
+          roomUsers.push(userSelectValue)
+  
+          // Update db ref
+          firebase.database()
+            .ref(`rooms/${this.state.roomId}/users`)
+            .set(roomUsers)
+  
+          removeClass('#invite-user-modal', 'is-active')
+          
+          Alert.invitationSent(userSelectValue)
           const messagesRef = firebase.database().ref('messages')
           
-          // Add left message to room
+          // Add join message to room
           const message = {
-            body: `${this.state.user.email} left room`,
+            body: `${userSelectValue} joined room`,
             room: this.state.currentRoom,
             date: '',
             profile_pic: '',
             username: ''
           }
             messagesRef.push(message)
-        
-        this.toggleRooms('Lobby')
-        Alert.confirmLeaveRoom(room)
-      }
-    })
+        } else {
+        changeInnerHtml('#error-container', '=', '<p>Please select a user</p>')       
+        }
 
+    } catch (err) {
+      console.log(err)
+      Alert.displayError('Sorry, user could not join room')      
+    }
+    }
+
+  leaveRoom = async roomId => {
+    try {
+      const roomSnapshot = await firebase.database()
+      .ref(`rooms/${this.state.roomId}/users`)
+      .once('value')
+      
+      // Get room users' value
+      let roomUsers = roomSnapshot.val()
+      
+      // Get array index of user
+      const index = roomUsers.indexOf(this.state.user.email)
+  
+      // Confirm message
+      swal({
+        title: `Are you sure you want to leave "${this.state.currentRoom}"?`,
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+      })
+      .then(willDelete => {
+        if (willDelete) {
+          const room = this.state.currentRoom
+          // Remove user from room
+          roomUsers.splice(1, index)        
+          
+          // Update db ref
+          firebase.database()
+            .ref(`rooms/${this.state.roomId}/users`)
+            .set(roomUsers)
+  
+            const messagesRef = firebase.database().ref('messages')
+            
+            // Add left message to room
+            const message = {
+              body: `${this.state.user.email} left room`,
+              room: this.state.currentRoom,
+              date: '',
+              profile_pic: '',
+              username: ''
+            }
+              messagesRef.push(message)
+          
+          this.toggleRooms('Lobby')
+          Alert.confirmLeaveRoom(room)
+        }
+      })
+    } catch (err) {
+      console.log(err)
+      Alert.displayError('Sorry, user could not leave room')  
+    }
   }
-
 
 // Mountings
 componentWillMount = () => {
@@ -311,77 +364,82 @@ componentWillMount = () => {
     }
   })
 }
-  componentDidMount = () => {
-
-    // Get all messages
-    const messagesRef = firebase.database().ref('messages')
-    messagesRef.on('value', (snapshot) => {
-      let messages = snapshot.val()
-      let newState = []
-      for (let message in messages) {
-        newState.push({
-          id: message,
-          body: messages[message].body,
-          username: messages[message].username,
-          profile_pic: messages[message].profile_pic,
-          date: messages[message].date,
-          room: messages[message].room
+  componentDidMount = async () => {
+    try {
+      // Get all messages
+      const messagesRef = firebase.database().ref('messages')
+      messagesRef.on('value', (snapshot) => {
+        let messages = snapshot.val()
+        let newState = []
+        for (let message in messages) {
+          newState.push({
+            id: message,
+            body: messages[message].body,
+            username: messages[message].username,
+            profile_pic: messages[message].profile_pic,
+            date: messages[message].date,
+            room: messages[message].room
+          })
+        }
+        this.setState({
+          messages: newState
+        })
+      })
+  
+      // Get any new user
+      const usersRef = firebase.database().ref('users')
+      usersRef.on('value', snapshot => {
+        const users = snapshot.val()
+        let userArr = []
+        for (const user in users) {
+          userArr.push(users[user])
+        }
+        const activeUser = this.state.user.email
+        if (!userArr.includes(activeUser)) {
+          usersRef.push(activeUser)      
+          userArr.push(activeUser)
+        }
+        this.setState({
+          users: userArr
+        })
+    })
+  
+    // Switch to lobby if user is in deleted room
+    firebase.database().ref("rooms")
+    .on('child_removed', (snapshot) => {
+      const roomName = snapshot.val().name
+      if (this.state.currentRoom === roomName) {
+        this.toggleRooms('Lobby')
+      }
+    })
+  
+    // Get all rooms
+    const roomsRef = firebase.database().ref('rooms')
+    roomsRef.on('value', (snapshot) => {
+      const rooms = snapshot.val()
+      let roomsArr = []
+      for (const room in rooms) {
+        roomsArr.push({
+          id: room,
+          name: rooms[room].name,
+          users: rooms[room].users,
+          creator: rooms[room].creator
         })
       }
       this.setState({
-        messages: newState
+        rooms: roomsArr,
       })
     })
-
-    // Get any new user
-    const usersRef = firebase.database().ref('users')
-    usersRef.on('value', snapshot => {
-      const users = snapshot.val()
-      let userArr = []
-      for (const user in users) {
-        userArr.push(users[user])
-      }
-      const activeUser = this.state.user.email
-      if (!userArr.includes(activeUser)) {
-        usersRef.push(activeUser)      
-        userArr.push(activeUser)
-      }
-      this.setState({
-        users: userArr
-      })
-  })
-
-  // Switch to lobby if user is in deleted room
-  firebase.database().ref("rooms")
-  .on('child_removed', (snapshot) => {
-    const roomName = snapshot.val().name
-    if (this.state.currentRoom === roomName) {
-      this.toggleRooms('Lobby')
-    }
-  })
-
-  // Get all rooms
-  const roomsRef = firebase.database().ref('rooms')
-  roomsRef.on('value', (snapshot) => {
-    const rooms = snapshot.val()
-    let roomsArr = []
-    for (const room in rooms) {
-      roomsArr.push({
-        id: room,
-        name: rooms[room].name,
-        users: rooms[room].users,
-        creator: rooms[room].creator
-      })
-    }
+  
+    // Place user in appropriate room
     this.setState({
-      rooms: roomsArr,
+      currentRoom: this.state.currentRoom || 'Lobby'
     })
-  })
 
-  // Place user in appropriate room
-  this.setState({
-    currentRoom: this.state.currentRoom || 'Lobby'
-  })
+    } catch (err) {
+      console.log(err)
+      Alert.displayError('Sorry, could not launch app')  
+    }
   }
 
 // Render
@@ -407,7 +465,7 @@ componentWillMount = () => {
                 rooms = {this.state.rooms}
                 checkRoomInput={this.checkRoomInput}
               />
-            <section className="modal-card-body">
+            <section className="modal-card-body" id='message-container'>
             { this.state.messages.map((message, index) => {
               return (
                 message.room === this.state.currentRoom

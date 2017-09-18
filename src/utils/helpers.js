@@ -1,4 +1,4 @@
-const get = element => {
+export const get = element => {
   const type = element.substr(0, 1)
   if (type === '#') {
     const id = element.substring(1, element.length)
@@ -11,4 +11,6 @@ const get = element => {
   }
 }
 
-export { get }
+export function bindEvent (target, callback, type = 'click', capture = false) {
+  target.addEventListener(type, callback, !!capture)
+}
