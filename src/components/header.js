@@ -13,7 +13,7 @@ function Header ({ login, name }) {
         </section>
         <footer className='modal-card-foot'>
           <button
-            className='button is-success'
+            className='button bd-tw-button'
             onClick={login}>{name}
           </button>
           <button className='button'>Cancel</button>

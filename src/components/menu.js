@@ -14,12 +14,6 @@ function Menu ({
   }
   return (
     <footer className='card-footer'>
-      <a onClick={checkRoomInput} className='card-footer-item' style={footerButton}>
-        <span className='bd-emoji mr-5'>
-          <i className='fa fa-plus-square' />
-        </span>
-        Create Room
-      </a>
       <a onClick={inviteUser} className='card-footer-item' style={footerButton}>
         <span className='bd-emoji mr-5'>
           <i className='fa fa-user-plus' />

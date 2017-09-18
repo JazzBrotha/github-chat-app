@@ -9,19 +9,24 @@ const toggleActiveRoomLinkColors = room => {
   )
 }
 
-const displayRoomInput = () => {
-  if (get('#create-room-container').childNodes.length === 1) {
-    const input = document.createElement('input')
-    input.setAttribute('type', 'text')
-    input.setAttribute('class', 'input')
-    input.setAttribute('placeholder', 'Type room name and press enter')
-    get('#create-room-container').appendChild(input)
-    return input
-  }
-}
+// const displayRoomInput = () => {
+//   if (get('#create-room-container').childNodes.length === 1) {
+//     const input = document.createElement('input')
+//     input.setAttribute('type', 'text')
+//     input.setAttribute('class', 'input')
+//     input.setAttribute('placeholder', 'Type room name and press enter')
+//     get('#create-room-container').appendChild(input)
+//     return input
+//   }
+// }
 
-const removeRoomInput = input => {
-  get('#create-room-container').removeChild(input)
+// const removeRoomInput = input => {
+//   get('#create-room-container').removeChild(input)
+// }
+
+const getRoomInput = () => {
+  const roomName = get('#room-name').value.trim()
+  return roomName
 }
 
 const addUserLeftMessage = user => {
@@ -36,6 +41,14 @@ const addClass = (element, className) => {
   get(element).classList.add(className)
 }
 
+const toggleClass = (element, className) => {
+  if (!get(element).classList.contains(className)) {
+    get(element).classList.add(className)
+  } else {
+    get(element).classList.remove(className)
+  }
+}
+
 const changeInnerHtml = (element, operator, html) => {
   if (operator === '=') {
     get(element).innerHTML = html
@@ -46,10 +59,10 @@ const changeInnerHtml = (element, operator, html) => {
 
 export {
   toggleActiveRoomLinkColors,
-  displayRoomInput,
-  removeRoomInput,
   addUserLeftMessage,
   removeClass,
   addClass,
-  changeInnerHtml
+  changeInnerHtml,
+  getRoomInput,
+  toggleClass
 }

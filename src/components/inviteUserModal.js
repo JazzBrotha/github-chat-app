@@ -24,7 +24,7 @@ function inviteUserModal ({ currentRoom, submitInviteUser }) {
           <p id='error-container' />
         </section>
         <footer className='modal-card-foot'>
-          <button onClick={submitInviteUser} id='submit-invite-user' className='button is-success'>Invite</button>
+          <button onClick={submitInviteUser} id='submit-invite-user' className='button bd-tw-button'>Invite</button>
           <button onClick={() => removeClass('#invite-user-modal', 'is-active')} className='button'>Cancel</button>
         </footer>
       </div>

@@ -1,13 +1,22 @@
 import React from 'react'
-function Navbar ({currentRoom, logout, toggleRooms, username, rooms}) {
+import { addClass, toggleClass } from '../utils/displays'
+function Navbar ({currentRoom, logout, toggleRooms, username, rooms, checkRoomInput}) {
+  const navbarStyle = {
+    zIndex: '3'
+  }
   return (
-    <nav className='navbar is-info'>
+    <nav className='navbar is-info' style={navbarStyle}>
       <div className='navbar-brand'>
-        <a className='navbar-item'>
+        <div className='navbar-item'>
           <h3 className='is-size-3'>{currentRoom}</h3>
-        </a>
+        </div>
+        <div className='navbar-burger burger' data-target='main-nav' onClick={() => toggleClass('#main-nav', 'is-active')} >
+          <span />
+          <span />
+          <span />
+        </div>
       </div>
-      <div id='navMenuColorinfo-example' className='navbar-menu'>
+      <div id='main-nav' className='navbar-menu'>
         <div className='navbar-start'>
           <div className='navbar-item has-dropdown is-hoverable'>
             <a className='navbar-link'>
@@ -27,6 +36,7 @@ function Navbar ({currentRoom, logout, toggleRooms, username, rooms}) {
           }
             </div>
           </div>
+          <a onClick={() => addClass('#create-room-modal', 'is-active')} className='navbar-item'>Create Room</a>
         </div>
         <div className='navbar-end'>
           <div className='navbar-item'>

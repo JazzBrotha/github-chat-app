@@ -8,16 +8,16 @@ import Chat from '../components/chat'
 import Navbar from '../components/navbar'
 import Notification from '../components/notification'
 import InviteUserModal from '../components/inviteUserModal'
+import CreateRoomModal from '../components/createRoomModal'
 import SendMessageCard from '../components/sendMessageCard'
 import { get } from '../utils/helpers'
 import {
   toggleActiveRoomLinkColors,
-  displayRoomInput,
-  removeRoomInput,
   addUserLeftMessage,
   removeClass,
   addClass,
-  changeInnerHtml 
+  changeInnerHtml,
+  getRoomInput 
 } from '../utils/displays'
 import Alert from '../utils/alerts'
 
@@ -48,7 +48,7 @@ class App extends Component {
       username: this.state.user.email,
       profile_pic: this.state.user.photoURL,
       date: date,
-      room: this.state.currentRoom
+      room: this.state.currentRoom || 'Lobby'
     }
       messagesRef.push(message)
       this.setState({
@@ -112,6 +112,7 @@ class App extends Component {
         const roomRef = firebase.database().ref(`/rooms/${roomId}`)
         roomRef.remove()
         Alert.roomDeleted()
+        this.toggleRooms('Lobby')
       }
     })
   }
@@ -132,25 +133,17 @@ class App extends Component {
         room.users.push(this.state.user.email)
         roomsRef.push(room)
         Alert.roomCreated()
+        removeClass('#create-room-modal', 'is-active')
         this.toggleRooms(room)
       } else {
         Alert.roomExists()
       }
   }
 
-  checkRoomInput = () => {
-    const input = displayRoomInput()
-    if (input) {
-      input.addEventListener('keyup', (e) => {
-        if (input.value.length > 0) {
-          if (e.which === 13) {
-          this.createRoom(input.value)
-          removeRoomInput(input)
-          this.toggleRooms(input.value)
-        }
-        }
-      })
-    }
+  submitCreateRoom = () => {
+    const roomName = getRoomInput()
+    this.createRoom(roomName)
+    this.toggleRooms(roomName)
   }
   toggleRooms = room => {
     room === 'Lobby'
@@ -218,8 +211,8 @@ class App extends Component {
       changeInnerHtml('#error-container', '=', '')
       // Get room users' snapshot
       const roomSnapshot = await firebase.database()
-      .ref(`rooms/${this.state.roomId}/users`)
-          .once('value')
+        .ref(`rooms/${this.state.roomId}/users`)
+        .once('value')
         
         // Get room users' value
         let roomUsers = roomSnapshot.val()
@@ -233,10 +226,6 @@ class App extends Component {
           .set(roomUsers)
 
         removeClass('#invite-user-modal', 'is-active')
-        
-        // this.setState({
-        //   roomId: '',
-        // })
         
         Alert.invitationSent(userSelectValue)
       } else {
@@ -271,6 +260,8 @@ class App extends Component {
         firebase.database()
           .ref(`rooms/${this.state.roomId}/users`)
           .set(roomUsers)
+        
+        this.toggleRooms('Lobby')
 
         swal("Left", {
           icon: "success",
@@ -279,21 +270,18 @@ class App extends Component {
       }
     })
 
-    // Set room notification
-    // firebase.database()
-    //   .ref(`rooms/${this.state.roomId}/notification`)
-    //   .set('User left channel')
-    // addUserLeftMessage(this.state.user.email)
   }
 
 
 // Mountings
+componentWillMount = () => {
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      this.setState({ user })
+    }
+  })
+}
   componentDidMount = () => {
-    auth.onAuthStateChanged((user) => {
-      if (user) {
-        this.setState({ user })
-      }
-    })
     const messagesRef = firebase.database().ref('messages')
     messagesRef.on('value', (snapshot) => {
       let messages = snapshot.val()
@@ -343,7 +331,9 @@ class App extends Component {
     this.setState({
       rooms: roomsArr,
     })
-    this.toggleRooms('Lobby')
+  })
+  this.setState({
+    currentRoom: this.state.currentRoom || 'Lobby'
   })
   }
 
@@ -357,6 +347,9 @@ class App extends Component {
               currentRoom = {this.state.currentRoom}
               submitInviteUser = {this.submitInviteUser}
             />
+            <CreateRoomModal
+              submitCreateRoom = {this.submitCreateRoom}
+            />
             <div className="modal-background"></div>
             <div className='modal-card'>
               <Navbar
@@ -365,6 +358,7 @@ class App extends Component {
                 username = {this.state.user.email}
                 toggleRooms = {this.toggleRooms}
                 rooms = {this.state.rooms}
+                checkRoomInput={this.checkRoomInput}
               />
             <section className="modal-card-body">
             { this.state.messages.map((message, index) => {
@@ -396,7 +390,7 @@ class App extends Component {
               removeRoom = {this.removeRoom} 
               leaveRoom = {this.leaveRoom}
               roomId = {this.state.roomId} 
-              currentRoom = {this.state.currentRoom}
+              currentRoom = {this.state.currentRoom || 'Lobby'}
             />
             </footer>
           </div>

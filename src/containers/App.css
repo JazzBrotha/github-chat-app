@@ -1,34 +1,10 @@
-.message-menu {
-  background-color: white;
-  height: 100vh;
-  padding: 20px;
+
+.swal-button--confirm {
+  background-color: #55acee;
 }
 
-.test {
-  height: 95vh;
-  overflow: auto;
-}
-
-.column.p-0 {
-  padding: 0
-}
-
-.p-10 {
-  padding: 10px;
-}
-
-li {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.mr-5 {
-  margin-right: 5px;
-}
-
-.card-header.bs-none {
-  box-shadow: none;
+.swal-button--confirm.swal-button--danger {
+  background-color: #e64942;
 }
 
 a.card-footer-item:hover {
