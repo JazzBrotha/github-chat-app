@@ -6,7 +6,6 @@ import Header from '../components/header'
 import swal from 'sweetalert'
 import Chat from '../components/chat'
 import Navbar from '../components/navbar'
-import Notification from '../components/notification'
 import InviteUserModal from '../components/inviteUserModal'
 import CreateRoomModal from '../components/createRoomModal'
 import SendMessageCard from '../components/sendMessageCard'
@@ -24,7 +23,6 @@ class App extends Component {
 
   state = {
     currentMessage: '',
-    username: '',
     messages: [],
     user: null,
     date: Date,
@@ -51,7 +49,6 @@ class App extends Component {
       messagesRef.push(message)
       this.setState({
         currentMessage: '',
-        username: '',
         date: date,
       })
   }
@@ -86,6 +83,8 @@ class App extends Component {
   }
 
   removeRoom = async (roomId) => {
+
+    // Show confirm message
     swal({
       title: `Are you sure you want to delete "${this.state.currentRoom}"?`,
       text: 'This cannot be undone',
@@ -117,19 +116,26 @@ class App extends Component {
 
   createRoom = async name => {
     const roomsRef = firebase.database().ref('rooms')
+
+    // Check if room name exists
     const roomsSnapshot = await roomsRef
       .orderByChild('name')
       .equalTo(name)
       .once('value')
-    
+
       if (!roomsSnapshot.val()) {
         const room = {
           name: name,
           users: [],
           creator: this.state.user.email
         }
+
+        // Push user to room
         room.users.push(this.state.user.email)
+
+        // Push room to rooms
         roomsRef.push(room)
+
         Alert.roomCreated()
         removeClass('#create-room-modal', 'is-active')
         this.toggleRooms(room)
@@ -159,44 +165,49 @@ class App extends Component {
   
   inviteUser = async () => {
     addClass('#invite-user-modal', 'is-active')
-    const roomsRef = firebase.database().ref('rooms')
-    const usersRef = firebase.database().ref('users')
-    let roomUsers
-    let roomId
-    
+
     // Find room snapshot
-    const roomSnapshot = await roomsRef
-    .orderByChild('name')
-    .equalTo(this.state.currentRoom)
-    .once('value')
-    
-    // Get room object
-    const roomObj = roomSnapshot.val()
-    
-    // Assign room key
-    for (const prop in roomObj) {
-      roomId = prop
-    }
-    
-    this.setState({
-      roomId: roomId
-    })
-    
-    // Assign room users
-    roomSnapshot.forEach(data => {
-      roomUsers = data.val().users
-    })
-    
-    const usersSnapshot = await usersRef.once('value')
-    const usersObj = usersSnapshot.val()
-    
-    changeInnerHtml('#users-select', '=', '<option>User</option>')
-    
-    // Find users that are not in the selected room
-    for (const user in usersObj) {
-      if (!roomUsers.includes(usersObj[user])) {
-        changeInnerHtml('#users-select', '+', `<option>${usersObj[user]}</option>`)
+    try {
+      const roomsRef = firebase.database().ref('rooms')
+      const usersRef = firebase.database().ref('users')
+      let roomUsers
+      let roomId
+      const roomSnapshot = await roomsRef
+      .orderByChild('name')
+      .equalTo(this.state.currentRoom)
+      .once('value')
+      
+      // Get room object
+      const roomObj = roomSnapshot.val()
+      
+      // Assign room key
+      for (const prop in roomObj) {
+        roomId = prop
       }
+      
+      this.setState({
+        roomId: roomId
+      })
+      
+      // Assign room users
+      roomSnapshot.forEach(data => {
+        roomUsers = data.val().users
+      })
+      
+      const usersSnapshot = await usersRef.once('value')
+      const usersObj = usersSnapshot.val()
+      
+      changeInnerHtml('#users-select', '=', '<option>User</option>')
+      
+      // Find users that are not in the selected room
+      for (const user in usersObj) {
+        if (!roomUsers.includes(usersObj[user])) {
+          changeInnerHtml('#users-select', '+', `<option>${usersObj[user]}</option>`)
+        }
+      }
+    } catch (err) {
+      console.log(err)
+      Alert.displayError('Sorry, could not invite user')
     }
   }
   
@@ -227,6 +238,7 @@ class App extends Component {
         Alert.invitationSent(userSelectValue)
         const messagesRef = firebase.database().ref('messages')
         
+        // Add join message to room
         const message = {
           body: `${userSelectValue} joined room`,
           room: this.state.currentRoom,
@@ -251,6 +263,7 @@ class App extends Component {
     // Get array index of user
     const index = roomUsers.indexOf(this.state.user.email)
 
+    // Confirm message
     swal({
       title: `Are you sure you want to leave "${this.state.currentRoom}"?`,
       icon: "warning",
@@ -270,6 +283,7 @@ class App extends Component {
 
           const messagesRef = firebase.database().ref('messages')
           
+          // Add left message to room
           const message = {
             body: `${this.state.user.email} left room`,
             room: this.state.currentRoom,
@@ -280,11 +294,7 @@ class App extends Component {
             messagesRef.push(message)
         
         this.toggleRooms('Lobby')
-
-        swal("Left", {
-          icon: "success",
-          text: `Left "${room}"` 
-        })
+        Alert.confirmLeaveRoom(room)
       }
     })
 
@@ -293,6 +303,8 @@ class App extends Component {
 
 // Mountings
 componentWillMount = () => {
+
+  // Check if user is logged in
   auth.onAuthStateChanged((user) => {
     if (user) {
       this.setState({ user })
@@ -300,6 +312,8 @@ componentWillMount = () => {
   })
 }
   componentDidMount = () => {
+
+    // Get all messages
     const messagesRef = firebase.database().ref('messages')
     messagesRef.on('value', (snapshot) => {
       let messages = snapshot.val()
@@ -318,6 +332,8 @@ componentWillMount = () => {
         messages: newState
       })
     })
+
+    // Get any new user
     const usersRef = firebase.database().ref('users')
     usersRef.on('value', snapshot => {
       const users = snapshot.val()
@@ -334,6 +350,17 @@ componentWillMount = () => {
         users: userArr
       })
   })
+
+  // Switch to lobby if user is in deleted room
+  firebase.database().ref("rooms")
+  .on('child_removed', (snapshot) => {
+    const roomName = snapshot.val().name
+    if (this.state.currentRoom === roomName) {
+      this.toggleRooms('Lobby')
+    }
+  })
+
+  // Get all rooms
   const roomsRef = firebase.database().ref('rooms')
   roomsRef.on('value', (snapshot) => {
     const rooms = snapshot.val()
@@ -350,6 +377,8 @@ componentWillMount = () => {
       rooms: roomsArr,
     })
   })
+
+  // Place user in appropriate room
   this.setState({
     currentRoom: this.state.currentRoom || 'Lobby'
   })

@@ -14,24 +14,24 @@ function SendMessageCard ({
   removeRoom,
   roomId
 }) {
-  const padding = {
+  const headerStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: '10px'
-  }
-  const formWidth = {
-    width: '520px'
   }
   return (
     <div className='card'>
-      <header className='card-header' style={padding}>
-              <form name='messageForm' onSubmit={submitMessage}>
-              <div className='field has-addons'>
+      <header className='card-header' style={headerStyle}>
+        <form name='messageForm' onSubmit={submitMessage}>
+          <div className='field has-addons'>
             <p className='control'>
               <a className='button is-static'>
                 <i className='fa fa-commenting-o' />
               </a>
             </p>
             <p className='control'>
-              <input style={formWidth} className='input' type='text' name='currentMessage' placeholder='Message' onChange={onChange} value={currentMessage} />
+              <input className='input' type='text' name='currentMessage' placeholder='Message' onChange={onChange} value={currentMessage} />
             </p>
             <p className='control'>
               <button className='button bd-tw-button' type='submit'>
@@ -39,7 +39,7 @@ function SendMessageCard ({
         </button>
             </p>
           </div>
-            </form>
+        </form>
       </header>
       { currentRoom !== 'Lobby'
             ? <Menu

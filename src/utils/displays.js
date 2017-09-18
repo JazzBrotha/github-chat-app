@@ -5,10 +5,6 @@ const getRoomInput = () => {
   return roomName
 }
 
-// const addUserLeftMessage = user => {
-//   get('#message-container').innerHTML = `<span>${user} left channel</span>`
-// }
-
 const removeClass = (element, className) => {
   get(element).classList.remove(className)
 }

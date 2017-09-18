@@ -22,5 +22,17 @@ export default {
       icon: 'success',
       text: `Invitation sent to ${user}`
     })
+  },
+  confirmLeaveRoom: room => {
+    swal('Left', {
+      icon: 'success',
+      text: `Left "${room}"`
+    })
+  },
+  displayError: message => {
+    swal({
+      icon: 'error',
+      text: `${message}`
+    })
   }
 }

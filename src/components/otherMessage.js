@@ -35,11 +35,14 @@ function Messages ({ message, key }) {
             </div>
         }
       </div>
-      <figure className='media-right'>
+      { message.username
+      ? <figure className='media-right'>
         <p className='image is-64x64'>
           <img src={message.profile_pic} />
         </p>
       </figure>
+      : null
+      }
     </article>
   )
 }
