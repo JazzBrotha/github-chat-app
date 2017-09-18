@@ -12,8 +12,6 @@ import CreateRoomModal from '../components/createRoomModal'
 import SendMessageCard from '../components/sendMessageCard'
 import { get } from '../utils/helpers'
 import {
-  toggleActiveRoomLinkColors,
-  addUserLeftMessage,
   removeClass,
   addClass,
   changeInnerHtml,
@@ -157,7 +155,6 @@ class App extends Component {
       roomCreator: room.creator,
       roomId: room.id
     })
-    toggleActiveRoomLinkColors(room.name || 'Lobby')
   }
   
   inviteUser = async () => {
@@ -228,6 +225,16 @@ class App extends Component {
         removeClass('#invite-user-modal', 'is-active')
         
         Alert.invitationSent(userSelectValue)
+        const messagesRef = firebase.database().ref('messages')
+        
+        const message = {
+          body: `${userSelectValue} joined room`,
+          room: this.state.currentRoom,
+          date: '',
+          profile_pic: '',
+          username: ''
+        }
+          messagesRef.push(message)
       } else {
       changeInnerHtml('#error-container', '=', '<p>Please select a user</p>')       
       }
@@ -260,6 +267,17 @@ class App extends Component {
         firebase.database()
           .ref(`rooms/${this.state.roomId}/users`)
           .set(roomUsers)
+
+          const messagesRef = firebase.database().ref('messages')
+          
+          const message = {
+            body: `${this.state.user.email} left room`,
+            room: this.state.currentRoom,
+            date: '',
+            profile_pic: '',
+            username: ''
+          }
+            messagesRef.push(message)
         
         this.toggleRooms('Lobby')
 

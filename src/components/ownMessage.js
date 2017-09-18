@@ -9,15 +9,15 @@ function OwnMessage ({ message, removeMessage, key }) {
   }
   return (
     <article key={key} className='media' style={margin}>
-            <figure className='media-left'>
+      <figure className='media-left'>
         <p className='image is-64x64'>
           <img src={message.profile_pic} />
         </p>
       </figure>
       <div className='media-content'>
         <div className='content' style={ownMessage}>
-          <p>  
-          <small>
+          <p>
+            <small>
               { message.date.split(',')[0] === new Date().toLocaleString().split(',')[0]
                 ? message.date.split(',')[1]
                 : message.date.split(',')[0]
