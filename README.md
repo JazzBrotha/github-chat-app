@@ -1,3 +1,3 @@
 # github-chat-app
 
-Currently under development.
+Simply chat app using Github login credentials in connection with Firebase.
