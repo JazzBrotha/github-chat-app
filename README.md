@@ -1,3 +1,3 @@
 # github-chat-app
 
-Simply chat app using Github login credentials in connection with Firebase.
+Simply chat app using Github login credentials to authenticate against a Firebase database.
